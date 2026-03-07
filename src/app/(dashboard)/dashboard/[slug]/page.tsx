@@ -77,6 +77,18 @@ export default async function CommunityDashboardPage({ params }: Props) {
             >
               👥 Membres
             </a>
+            <a
+              href={`/dashboard/${community.slug}/modules`}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            >
+              🧩 Modules
+            </a>
+            <a
+              href={`/dashboard/${community.slug}/stats`}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            >
+              📊 Stats
+            </a>
           </div>
         </div>
       </header>
