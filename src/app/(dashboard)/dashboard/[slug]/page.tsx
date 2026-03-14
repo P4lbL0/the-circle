@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { InviteWidget } from './InviteWidget'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -115,9 +116,7 @@ export default async function CommunityDashboardPage({ params }: Props) {
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-bold text-gray-900">Membres</h2>
-            <button className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition">
-              + Inviter
-            </button>
+            <InviteWidget slug={community.slug} communityName={community.name} />
           </div>
 
           {members && members.length > 0 ? (

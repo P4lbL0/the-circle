@@ -1,5 +1,8 @@
 'use client'
 
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+
 interface Community {
   id:           string
   name:         string
@@ -14,7 +17,7 @@ export function JoinClient({ community, token }: {
   community: Community
   token:     string
 }) {
-  const theme  = community.theme_json as {
+  const theme = community.theme_json as {
     primaryColor: string
     accentColor:  string
     font:         string
@@ -26,6 +29,36 @@ export function JoinClient({ community, token }: {
   const text  = theme.darkMode ? '#e0e0e0' : '#1a1a1a'
   const muted = theme.darkMode ? '#666'    : '#999'
   const bord  = theme.darkMode ? '#2a2a2a' : '#e0e0e0'
+  const inputBg = theme.darkMode ? '#0f0f0f' : '#f8f8f8'
+
+  const [email, setEmail]   = useState('')
+  const [sent, setSent]     = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError]   = useState<string | null>(null)
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    const supabase = createClient()
+    const redirectTo =
+      `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/join/${community.slug}?token=${token}`)}`
+
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo },
+    })
+
+    if (otpError) {
+      setError('Impossible d\'envoyer le lien. Vérifie ton email.')
+      setLoading(false)
+      return
+    }
+
+    setSent(true)
+    setLoading(false)
+  }
 
   return (
     <div style={{ background: bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Rajdhani', sans-serif", padding: '24px' }}>
@@ -69,43 +102,96 @@ export function JoinClient({ community, token }: {
         </p>
 
         {community.description && (
-          <p style={{ color: theme.darkMode ? '#888' : '#777', fontSize: '0.88rem', margin: '0 0 30px', lineHeight: 1.5, fontStyle: 'italic' }}>
+          <p style={{ color: theme.darkMode ? '#888' : '#777', fontSize: '0.88rem', margin: '0 0 28px', lineHeight: 1.5, fontStyle: 'italic' }}>
             "{community.description}"
           </p>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* Créer un compte */}
-          <a
-            href={`/signup?redirect=/join/${community.slug}?token=${token}`}
-            style={{
-              display: 'block', background: theme.primaryColor, color: '#000',
-              fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold',
-              padding: '13px', borderRadius: '6px', textDecoration: 'none',
-              textTransform: 'uppercase', fontSize: '0.85rem', letterSpacing: '1px',
-            }}
-          >
-            Créer un compte & rejoindre
-          </a>
+        {/* ── État : email envoyé ── */}
+        {sent ? (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📬</div>
+            <h3 style={{ fontFamily: `'${theme.font}', sans-serif`, color: theme.primaryColor, fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '0 0 12px' }}>
+              Vérifie ta boîte mail
+            </h3>
+            <p style={{ color: muted, fontSize: '0.88rem', lineHeight: 1.6, margin: '0 0 20px' }}>
+              On a envoyé un lien magique à <strong style={{ color: text }}>{email}</strong>.<br />
+              Clique dessus pour rejoindre instantanément la communauté.
+            </p>
+            <button
+              onClick={() => { setSent(false); setEmail('') }}
+              style={{ background: 'transparent', border: 'none', color: muted, fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              Utiliser un autre email
+            </button>
+          </div>
+        ) : (
+          /* ── Formulaire magic link ── */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
-          {/* Déjà un compte */}
-          <a
-            href={`/login?redirect=/join/${community.slug}?token=${token}`}
-            style={{
-              display: 'block', background: 'transparent',
-              border: `1px solid ${bord}`, color: muted,
-              fontFamily: `'${theme.font}', sans-serif`,
-              padding: '12px', borderRadius: '6px', textDecoration: 'none',
-              textTransform: 'uppercase', fontSize: '0.82rem',
-            }}
-          >
-            J'ai déjà un compte
-          </a>
+            <form onSubmit={handleMagicLink} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <input
+                type="email"
+                required
+                placeholder="ton@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                style={{
+                  background: inputBg, border: `1px solid ${bord}`,
+                  color: text, padding: '13px 16px', borderRadius: '8px',
+                  fontFamily: 'Rajdhani', fontSize: '1rem', outline: 'none',
+                  textAlign: 'center',
+                  transition: 'border-color 0.15s',
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = theme.primaryColor)}
+                onBlur={e => (e.currentTarget.style.borderColor = bord)}
+              />
 
-          <a href={`/c/${community.slug}`} style={{ color: muted, fontSize: '0.8rem', marginTop: '6px' }}>
-            Voir la vitrine sans rejoindre →
-          </a>
-        </div>
+              {error && (
+                <p style={{ color: '#FF2344', fontSize: '0.82rem', margin: 0 }}>{error}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  background: loading ? `${theme.primaryColor}66` : theme.primaryColor,
+                  color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold',
+                  padding: '13px', borderRadius: '8px', border: 'none',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  textTransform: 'uppercase', fontSize: '0.9rem', letterSpacing: '1px',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {loading ? 'Envoi...' : '✨ Rejoindre en 1 clic'}
+              </button>
+            </form>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '4px 0' }}>
+              <div style={{ flex: 1, height: '1px', background: bord }} />
+              <span style={{ color: muted, fontSize: '0.75rem' }}>ou</span>
+              <div style={{ flex: 1, height: '1px', background: bord }} />
+            </div>
+
+            <a
+              href={`/login?redirect=/join/${community.slug}?token=${token}`}
+              style={{
+                display: 'block', background: 'transparent',
+                border: `1px solid ${bord}`, color: muted,
+                fontFamily: `'${theme.font}', sans-serif`,
+                padding: '12px', borderRadius: '8px', textDecoration: 'none',
+                textTransform: 'uppercase', fontSize: '0.82rem',
+                transition: 'border-color 0.15s',
+              }}
+            >
+              J'ai déjà un compte
+            </a>
+
+            <a href={`/c/${community.slug}`} style={{ color: muted, fontSize: '0.8rem', marginTop: '4px' }}>
+              Voir la vitrine sans rejoindre →
+            </a>
+          </div>
+        )}
       </div>
     </div>
   )
