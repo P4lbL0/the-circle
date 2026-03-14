@@ -58,6 +58,15 @@ export default async function PublicChatPage({ params }: Props) {
         )}
       </header>
 
+      <style>{`
+        .chat-group-link {
+          display: flex; align-items: center; gap: 16px;
+          background: ${panel}; border: 1px solid ${bord}; border-radius: 12px;
+          padding: 18px 22px; text-decoration: none; transition: border-color 0.15s;
+        }
+        .chat-group-link:hover { border-color: ${theme.primaryColor}; }
+      `}</style>
+
       <div style={{ maxWidth: '700px', margin: '0 auto', padding: '40px 24px' }}>
         {visibleGroups.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px', color: muted }}>
@@ -72,13 +81,7 @@ export default async function PublicChatPage({ params }: Props) {
               <a
                 key={group.id}
                 href={`/c/${community.slug}/chat/${group.id}`}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '16px',
-                  background: panel, border: `1px solid ${bord}`, borderRadius: '12px',
-                  padding: '18px 22px', textDecoration: 'none', transition: 'border-color 0.15s',
-                }}
-                onMouseEnter={e => (e.currentTarget).style.borderColor = theme.primaryColor}
-                onMouseLeave={e => (e.currentTarget).style.borderColor = bord}
+                className="chat-group-link"
               >
                 <div style={{
                   width: '44px', height: '44px', borderRadius: '10px',

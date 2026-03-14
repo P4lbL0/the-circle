@@ -52,10 +52,11 @@ CREATE POLICY "chat_groups_select" ON chat_groups
     )
   );
 
--- chat_groups : création (owner / modérateur uniquement)
+-- chat_groups : création (owner communauté OU modérateur)
 CREATE POLICY "chat_groups_insert" ON chat_groups
   FOR INSERT WITH CHECK (
-    EXISTS (
+    auth.uid() = (SELECT owner_id FROM communities WHERE id = chat_groups.community_id)
+    OR EXISTS (
       SELECT 1 FROM community_members
       WHERE community_id = chat_groups.community_id
         AND profile_id   = auth.uid()
@@ -63,10 +64,11 @@ CREATE POLICY "chat_groups_insert" ON chat_groups
     )
   );
 
--- chat_groups : modification (owner / modérateur)
+-- chat_groups : modification (owner communauté OU modérateur)
 CREATE POLICY "chat_groups_update" ON chat_groups
   FOR UPDATE USING (
-    EXISTS (
+    auth.uid() = (SELECT owner_id FROM communities WHERE id = chat_groups.community_id)
+    OR EXISTS (
       SELECT 1 FROM community_members
       WHERE community_id = chat_groups.community_id
         AND profile_id   = auth.uid()
@@ -74,10 +76,11 @@ CREATE POLICY "chat_groups_update" ON chat_groups
     )
   );
 
--- chat_groups : suppression (owner / modérateur)
+-- chat_groups : suppression (owner communauté OU modérateur)
 CREATE POLICY "chat_groups_delete" ON chat_groups
   FOR DELETE USING (
-    EXISTS (
+    auth.uid() = (SELECT owner_id FROM communities WHERE id = chat_groups.community_id)
+    OR EXISTS (
       SELECT 1 FROM community_members
       WHERE community_id = chat_groups.community_id
         AND profile_id   = auth.uid()
