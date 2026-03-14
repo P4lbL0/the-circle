@@ -53,7 +53,8 @@ export default async function ChatRoomPage({ params }: Props) {
     .order('created_at', { ascending: false })
     .limit(50)
 
-  const initialMessages = (messages ?? []).reverse()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const initialMessages = (messages ?? []).reverse() as any[]
 
   return (
     <ChatClient
