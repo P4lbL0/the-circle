@@ -26,10 +26,11 @@ export default async function CommunityVitrinePage({ params }: Props) {
     darkMode:     boolean
   }
 
-  const bg    = theme.darkMode ? '#0a0a0a' : '#f5f5f5'
-  const panel = theme.darkMode ? '#141414' : '#ffffff'
-  const text  = theme.darkMode ? '#e0e0e0' : '#1a1a1a'
-  const muted = theme.darkMode ? '#666'    : '#999'
+  const bg          = theme.darkMode ? '#0a0a0a' : '#f5f5f5'
+  const panel       = theme.darkMode ? '#141414' : '#ffffff'
+  const text        = theme.darkMode ? '#e0e0e0' : '#1a1a1a'
+  const muted       = theme.darkMode ? '#666'    : '#999'
+  const primaryColor = theme.primaryColor
 
   // Membres publics actifs
   const { data: members } = await supabase
@@ -75,163 +76,483 @@ export default async function CommunityVitrinePage({ params }: Props) {
     return { ...member, computed_score: score }
   }).sort((a, b) => b.computed_score - a.computed_score)
 
+  const showPodium = membersWithScore.length >= 3 && activeModules.includes('scores')
+  const showModuleNav = publicModules.length >= 2
+
+  // Podium order: #2, #1, #3
+  const podiumOrder = showPodium
+    ? [membersWithScore[1], membersWithScore[0], membersWithScore[2]]
+    : []
+  const podiumRanks = [2, 1, 3]
+
   return (
     <div style={{ backgroundColor: bg, minHeight: '100vh', fontFamily: `'Rajdhani', sans-serif`, color: text }}>
 
-      {/* ── FONTS ── */}
+      {/* ── FONTS & GLOBAL STYLES ── */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Oswald:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
+
+        .vit-nav-link {
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 0.88rem;
+          color: ${muted};
+          text-decoration: none;
+          padding: 14px 20px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          white-space: nowrap;
+          border-bottom: 2px solid transparent;
+          transition: color 0.2s, border-color 0.2s;
+        }
+        .vit-nav-link:hover {
+          color: ${primaryColor};
+          border-bottom-color: ${primaryColor};
+        }
+
+        .vit-header-link {
+          font-size: 0.75rem;
+          color: ${muted};
+          text-decoration: none;
+          padding: 8px 14px;
+          border-radius: 4px;
+          position: relative;
+          transition: color 0.2s;
+          font-family: 'Rajdhani', sans-serif;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          display: inline-block;
+        }
+        .vit-header-link::after {
+          content: '';
+          position: absolute;
+          bottom: 2px; left: 14px; right: 14px;
+          height: 1px;
+          background: ${primaryColor};
+          transform: scaleX(0);
+          transition: transform 0.2s;
+        }
+        .vit-header-link:hover { color: ${primaryColor}; }
+        .vit-header-link:hover::after { transform: scaleX(1); }
+
+        .vit-join-btn {
+          display: inline-block;
+          background: ${primaryColor};
+          color: #000;
+          font-family: 'Orbitron', sans-serif;
+          font-weight: bold;
+          padding: 14px 32px;
+          border-radius: 6px;
+          text-decoration: none;
+          text-transform: uppercase;
+          font-size: 0.82rem;
+          letter-spacing: 2px;
+          box-shadow: 0 0 20px ${primaryColor}40;
+          transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .vit-join-btn:hover {
+          box-shadow: 0 0 36px ${primaryColor}70;
+          transform: translateY(-1px);
+        }
+
+        .vit-stat-pill {
+          background: ${theme.darkMode ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)'};
+          border: 1px solid ${primaryColor}33;
+          border-radius: 20px;
+          padding: 8px 18px;
+          font-size: 0.82rem;
+          color: ${muted};
+          white-space: nowrap;
+        }
+        .vit-stat-pill span {
+          color: ${primaryColor};
+          font-family: 'Orbitron', sans-serif;
+          font-weight: 700;
+          margin-right: 4px;
+        }
+
+        .vit-podium-card {
+          background: ${theme.darkMode ? '#141414' : '#fff'};
+          border: 1px solid ${theme.darkMode ? '#2a2a2a' : '#ddd'};
+          border-radius: 12px;
+          padding: 24px 16px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          transition: transform 0.2s;
+        }
+        .vit-podium-card:hover { transform: translateY(-2px); }
+        .vit-podium-card.rank-1 {
+          border-color: ${primaryColor};
+          box-shadow: 0 0 24px ${primaryColor}30;
+          transform: translateY(-10px);
+        }
+        .vit-podium-card.rank-1:hover { transform: translateY(-12px); }
+
+        @media (max-width: 768px) {
+          .vit-hero-title { font-size: 2rem !important; }
+          .vit-hero-desc { display: none; }
+          .vit-stat-pills { flex-wrap: wrap !important; justify-content: center !important; }
+          .vit-podium { grid-template-columns: 1fr !important; }
+          .vit-members-grid { grid-template-columns: 1fr !important; }
+          .vit-header-nav { display: none !important; }
+          .vit-module-nav-scroll { overflow-x: auto; }
+        }
       `}</style>
 
-      {/* ── HEADER ── */}
+      {/* ── HEADER (sticky) ── */}
       <header style={{
-        backgroundColor: theme.darkMode ? '#0d0d0d' : '#fff',
-        borderBottom: `2px solid ${theme.primaryColor}`,
-        padding: '15px 30px',
+        backgroundColor: theme.darkMode ? '#080808' : '#fff',
+        borderBottom: `2px solid ${primaryColor}`,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        position: 'sticky', top: 0, zIndex: 1000,
+        padding: '0 30px', position: 'sticky', top: 0, zIndex: 1000,
+        minHeight: '60px',
       }}>
+        {/* Left: logo + name + badge */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           {community.logo_url && (
-            <img src={community.logo_url} alt={community.name}
-              style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover', border: `1px solid ${theme.primaryColor}` }}
+            <img
+              src={community.logo_url}
+              alt={community.name}
+              style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover', border: `1px solid ${primaryColor}` }}
             />
           )}
-          <div>
-            <h1 style={{
-              margin: 0, fontFamily: `'${theme.font}', sans-serif`,
-              fontSize: '1.2rem', color: theme.darkMode ? 'white' : '#111',
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{
+              fontFamily: `'Orbitron', sans-serif`,
+              fontSize: '1rem', fontWeight: 700,
+              color: theme.darkMode ? 'white' : '#111',
               textTransform: 'uppercase', letterSpacing: '2px',
             }}>
               {community.name}
-              <span style={{
-                fontSize: '0.5em', color: theme.primaryColor,
-                border: `1px solid ${theme.primaryColor}`,
-                padding: '2px 5px', borderRadius: '3px', marginLeft: '8px', verticalAlign: 'middle',
-              }}>
-                {community.subscription_tier.toUpperCase()}
-              </span>
-            </h1>
-            <p style={{ margin: 0, fontSize: '0.72rem', color: muted, marginTop: '2px' }}>
-              thecircle.app/c/{community.slug}
-            </p>
+            </span>
+            <span style={{
+              fontSize: '0.6rem', color: primaryColor,
+              border: `1px solid ${primaryColor}`,
+              padding: '2px 6px', borderRadius: '3px',
+              fontFamily: 'Orbitron', letterSpacing: '1px',
+            }}>
+              {community.subscription_tier.toUpperCase()}
+            </span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        {/* Right: nav links + login */}
+        <div className="vit-header-nav" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           {publicModules.includes('scores') && (
-            <a href={`/c/${slug}/leaderboard`} style={{
-              fontFamily: `'${theme.font}', sans-serif`, fontSize: '0.72rem',
-              color: muted, border: `1px solid ${theme.darkMode ? '#333' : '#ddd'}`,
-              padding: '7px 14px', borderRadius: '4px', textDecoration: 'none',
-            }}>
-              Classement
-            </a>
+            <a href={`/c/${slug}/leaderboard`} className="vit-header-link">🏆 Classement</a>
+          )}
+          {publicModules.includes('calendar') && (
+            <a href={`/c/${slug}/events`} className="vit-header-link">📅 Événements</a>
+          )}
+          {publicModules.includes('tournaments') && (
+            <a href={`/c/${slug}/tournaments`} className="vit-header-link">🥊 Tournois</a>
+          )}
+          {publicModules.includes('bets') && (
+            <a href={`/c/${slug}/bets`} className="vit-header-link">🎲 Paris</a>
+          )}
+          {publicModules.includes('forum') && (
+            <a href={`/c/${slug}/forum`} className="vit-header-link">💬 Forum</a>
+          )}
+          {publicModules.includes('shop') && (
+            <a href={`/c/${slug}/shop`} className="vit-header-link">🛍️ Boutique</a>
           )}
           <a href="/login" style={{
-            fontFamily: `'${theme.font}', sans-serif`, fontSize: '0.72rem',
-            color: theme.primaryColor, border: `1px solid ${theme.primaryColor}`,
-            padding: '7px 14px', borderRadius: '4px', textDecoration: 'none',
-            textTransform: 'uppercase',
+            marginLeft: '12px',
+            fontFamily: `'Orbitron', sans-serif`, fontSize: '0.72rem',
+            color: primaryColor, border: `1px solid ${primaryColor}`,
+            padding: '8px 16px', borderRadius: '4px', textDecoration: 'none',
+            textTransform: 'uppercase', letterSpacing: '1px',
+            transition: 'background 0.2s',
           }}>
             Connexion
           </a>
         </div>
       </header>
 
-      {/* ── HERO ── */}
+      {/* ── HERO (full-width) ── */}
       <section style={{
-        backgroundColor: theme.darkMode ? '#1e1e1e' : '#f0f0f0',
-        textAlign: 'center', padding: '80px 30px',
-        borderBottom: `5px solid ${theme.primaryColor}`,
-        boxShadow: `0 0 30px ${theme.primaryColor}18`,
-        position: 'relative', overflow: 'hidden',
+        position: 'relative',
+        minHeight: '400px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden',
+        backgroundColor: theme.darkMode ? '#1a1a1a' : '#f0f0f0',
       }}>
-        {community.banner_url && (
+        {/* Background image or pattern */}
+        {community.banner_url ? (
+          <>
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${community.banner_url})`,
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              opacity: 0.3,
+            }} />
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, ${bg} 100%)`,
+            }} />
+          </>
+        ) : (
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundImage: `url(${community.banner_url})`,
-            backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15,
+            backgroundImage: `radial-gradient(${primaryColor}11 1px, transparent 1px)`,
+            backgroundSize: '24px 24px',
           }} />
         )}
-        <div style={{ position: 'relative', display: 'inline-block', background: 'rgba(0,0,0,0.45)', padding: '30px 50px', borderRadius: '8px', maxWidth: '800px' }}>
+
+        {/* Hero content */}
+        <div style={{
+          position: 'relative', zIndex: 1,
+          maxWidth: '900px', width: '100%',
+          margin: '0 auto', padding: '80px 30px',
+          textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px',
+        }}>
+          {/* Logo */}
           {community.logo_url && (
-            <img src={community.logo_url} alt={community.name}
-              style={{ width: '72px', height: '72px', borderRadius: '12px', objectFit: 'cover', marginBottom: '18px', border: `2px solid ${theme.primaryColor}` }}
+            <img
+              src={community.logo_url}
+              alt={community.name}
+              style={{
+                width: '100px', height: '100px',
+                borderRadius: '16px', objectFit: 'cover',
+                border: `3px solid ${primaryColor}`,
+                boxShadow: `0 0 30px ${primaryColor}50`,
+              }}
             />
           )}
-          <h2 style={{
-            fontFamily: `'${theme.font}', sans-serif`, fontSize: '2.4rem',
-            fontWeight: 700, textTransform: 'uppercase',
-            color: theme.darkMode ? 'white' : '#111', margin: '0 0 14px',
-          }}>
-            Bienvenue dans{' '}
-            <span style={{ color: theme.primaryColor, textShadow: `0 0 12px ${theme.primaryColor}88` }}>
-              {community.name}
-            </span>
-          </h2>
 
+          {/* Name */}
+          <h1
+            className="vit-hero-title"
+            style={{
+              fontFamily: `'Orbitron', sans-serif`,
+              fontSize: 'clamp(2rem, 5vw, 4rem)',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              color: theme.darkMode ? 'white' : '#111',
+              margin: 0,
+              textShadow: `0 0 40px ${primaryColor}60`,
+              letterSpacing: '3px',
+            }}
+          >
+            {community.name}
+          </h1>
+
+          {/* Description */}
           {community.description && (
-            <p style={{ fontSize: '1.05rem', color: theme.darkMode ? '#ccc' : '#555', maxWidth: '600px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+            <p
+              className="vit-hero-desc"
+              style={{
+                fontStyle: 'italic',
+                color: muted,
+                maxWidth: '600px',
+                margin: 0,
+                fontSize: '1.05rem',
+                lineHeight: 1.6,
+              }}
+            >
               {community.description}
             </p>
           )}
 
-          {/* Stats rapides */}
-          <div style={{
-            display: 'inline-flex', background: theme.darkMode ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.05)',
-            border: `1px solid ${theme.primaryColor}22`, borderRadius: '10px', padding: '14px 24px',
-            gap: '0', marginBottom: publicModules.includes('applications') ? '24px' : '0',
-          }}>
-            {[
-              { value: membersWithScore.length, label: 'Membres' },
-              { value: activeModules.length,    label: 'Modules' },
-            ].map((stat, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-                {i > 0 && <div style={{ width: '1px', height: '36px', background: theme.darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.1)', margin: '0 20px' }} />}
-                <div style={{ textAlign: 'center', minWidth: '90px' }}>
-                  <div style={{ fontFamily: `'${theme.font}', sans-serif`, color: theme.primaryColor, fontSize: '1.5rem', fontWeight: 700 }}>
-                    {stat.value}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: muted, marginTop: '4px' }}>{stat.label}</div>
-                </div>
-              </div>
-            ))}
+          {/* Stat pills */}
+          <div className="vit-stat-pills" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
+            <div className="vit-stat-pill">
+              <span>{membersWithScore.length}</span>Membres
+            </div>
+            <div className="vit-stat-pill">
+              <span>{activeModules.length}</span>Modules
+            </div>
+            {activeModules.includes('tournaments') && (
+              <div className="vit-stat-pill">⚔️ Tournois</div>
+            )}
+            {activeModules.includes('bets') && (
+              <div className="vit-stat-pill">🎲 Paris</div>
+            )}
+            {activeModules.includes('forum') && (
+              <div className="vit-stat-pill">💬 Forum</div>
+            )}
+            {activeModules.includes('shop') && (
+              <div className="vit-stat-pill">🛍️ Boutique</div>
+            )}
           </div>
 
+          {/* Join button */}
           {publicModules.includes('applications') && (
-            <div>
-              <a href={`/c/${slug}/apply`} style={{
-                display: 'inline-block',
-                background: theme.primaryColor, color: '#121212',
-                fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold',
-                padding: '12px 28px', borderRadius: '4px', textDecoration: 'none',
-                textTransform: 'uppercase', fontSize: '0.85rem', letterSpacing: '1px',
-              }}>
-                Rejoindre la communauté
-              </a>
-            </div>
+            <a href={`/c/${slug}/apply`} className="vit-join-btn">
+              Rejoindre la communauté
+            </a>
           )}
         </div>
       </section>
 
-      {/* ── MEMBRES ── */}
-      <section style={{ padding: '50px 30px', maxWidth: '1200px', margin: '0 auto' }}>
-        <h3 style={{
-          fontFamily: `'${theme.font}', sans-serif`,
-          color: theme.darkMode ? 'white' : '#111',
-          borderLeft: `4px solid ${theme.primaryColor}`,
-          paddingLeft: '15px', marginBottom: '30px', fontSize: '1.5rem',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      {/* ── MODULE NAV (sticky under hero, if 2+ public modules) ── */}
+      {showModuleNav && (
+        <nav style={{
+          position: 'sticky',
+          top: '60px',
+          zIndex: 999,
+          backgroundColor: theme.darkMode ? '#0d0d0d' : '#f8f8f8',
+          borderBottom: `1px solid ${primaryColor}33`,
         }}>
-          Membres
-          <span style={{ fontSize: '0.72rem', color: muted, fontFamily: 'Rajdhani', letterSpacing: '1px' }}>
+          <div className="vit-module-nav-scroll" style={{ display: 'flex', maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+            {publicModules.includes('scores') && (
+              <a href={`/c/${slug}/leaderboard`} className="vit-nav-link">🏆 Classement</a>
+            )}
+            {publicModules.includes('calendar') && (
+              <a href={`/c/${slug}/events`} className="vit-nav-link">📅 Événements</a>
+            )}
+            {publicModules.includes('tournaments') && (
+              <a href={`/c/${slug}/tournaments`} className="vit-nav-link">🥊 Tournois</a>
+            )}
+            {publicModules.includes('bets') && (
+              <a href={`/c/${slug}/bets`} className="vit-nav-link">🎲 Paris</a>
+            )}
+            {publicModules.includes('forum') && (
+              <a href={`/c/${slug}/forum`} className="vit-nav-link">💬 Forum</a>
+            )}
+            {publicModules.includes('shop') && (
+              <a href={`/c/${slug}/shop`} className="vit-nav-link">🛍️ Boutique</a>
+            )}
+          </div>
+        </nav>
+      )}
+
+      {/* ── MEMBRES ── */}
+      <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 30px' }}>
+        {/* Section title */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: '40px',
+          borderLeft: `4px solid ${primaryColor}`,
+          paddingLeft: '16px',
+        }}>
+          <h2 style={{
+            fontFamily: `'${theme.font}', sans-serif`,
+            color: theme.darkMode ? 'white' : '#111',
+            margin: 0, fontSize: '1.6rem',
+            textTransform: 'uppercase', letterSpacing: '2px',
+          }}>
+            Membres
+          </h2>
+          <span style={{ fontSize: '0.75rem', color: muted, fontFamily: 'Rajdhani', letterSpacing: '1px' }}>
             {membersWithScore.length} MEMBRE{membersWithScore.length > 1 ? 'S' : ''}
           </span>
-        </h3>
+        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
+        {/* PODIUM TOP 3 */}
+        {showPodium && (
+          <div style={{ marginBottom: '48px' }}>
+            <div style={{
+              fontSize: '0.72rem', color: muted, fontFamily: 'Orbitron',
+              textTransform: 'uppercase', letterSpacing: '2px',
+              marginBottom: '20px', textAlign: 'center',
+            }}>
+              Top 3
+            </div>
+            <div
+              className="vit-podium"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1.15fr 1fr',
+                gap: '16px',
+                alignItems: 'flex-end',
+                maxWidth: '700px',
+                margin: '0 auto',
+              }}
+            >
+              {podiumOrder.map((member, idx) => {
+                const rank = podiumRanks[idx]
+                const isFirst = rank === 1
+                const profile = member.profiles as any
+                const displayName = profile?.display_name ?? profile?.email?.split('@')[0] ?? 'Membre'
+                const initial = displayName[0]?.toUpperCase() ?? '?'
+                return (
+                  <div
+                    key={member.id}
+                    className={`vit-podium-card${isFirst ? ' rank-1' : ''}`}
+                  >
+                    {/* Rank badge */}
+                    <div style={{
+                      width: '28px', height: '28px', borderRadius: '50%',
+                      background: isFirst ? primaryColor : (theme.darkMode ? '#2a2a2a' : '#eee'),
+                      color: isFirst ? '#000' : muted,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontFamily: 'Orbitron', fontWeight: 700, fontSize: '0.75rem',
+                    }}>
+                      #{rank}
+                    </div>
+                    {/* Avatar */}
+                    {profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt={displayName}
+                        style={{
+                          width: isFirst ? '72px' : '56px',
+                          height: isFirst ? '72px' : '56px',
+                          borderRadius: '10px',
+                          objectFit: 'cover',
+                          border: `${isFirst ? '3px' : '1px'} solid ${isFirst ? primaryColor : (theme.darkMode ? '#333' : '#ddd')}`,
+                          boxShadow: isFirst ? `0 0 16px ${primaryColor}40` : 'none',
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: isFirst ? '72px' : '56px',
+                        height: isFirst ? '72px' : '56px',
+                        borderRadius: '10px',
+                        background: theme.darkMode ? '#2a2a2a' : '#eee',
+                        border: `${isFirst ? '3px' : '1px'} solid ${isFirst ? primaryColor : (theme.darkMode ? '#333' : '#ddd')}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontFamily: `'${theme.font}', sans-serif`,
+                        color: isFirst ? primaryColor : muted,
+                        fontSize: isFirst ? '1.8rem' : '1.4rem',
+                        fontWeight: 700,
+                        boxShadow: isFirst ? `0 0 16px ${primaryColor}40` : 'none',
+                      }}>
+                        {initial}
+                      </div>
+                    )}
+                    {/* Name */}
+                    <div style={{
+                      fontFamily: `'${theme.font}', sans-serif`,
+                      fontSize: isFirst ? '0.95rem' : '0.85rem',
+                      color: theme.darkMode ? 'white' : '#111',
+                      fontWeight: 700,
+                      textAlign: 'center',
+                    }}>
+                      {displayName}
+                    </div>
+                    {/* Score */}
+                    <div style={{
+                      fontFamily: 'Orbitron',
+                      fontSize: isFirst ? '1.1rem' : '0.9rem',
+                      color: primaryColor,
+                      fontWeight: 700,
+                    }}>
+                      {member.computed_score}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: muted }}>
+                      {formulaConfig?.label ?? 'Score'}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* All members grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+          gap: '20px',
+        }}>
           {membersWithScore.map((member, idx) => (
             <MemberCard
               key={member.id}
@@ -247,12 +568,19 @@ export default async function CommunityVitrinePage({ params }: Props) {
 
       {/* ── FOOTER ── */}
       <footer style={{
-        borderTop: `1px solid ${theme.darkMode ? '#222' : '#ddd'}`,
-        textAlign: 'center', padding: '28px',
-        color: theme.darkMode ? '#333' : '#bbb', fontSize: '0.82rem',
+        backgroundColor: theme.darkMode ? '#080808' : '#f0f0f0',
+        textAlign: 'center',
+        padding: '40px',
+        color: theme.darkMode ? '#333' : '#bbb',
+        fontSize: '0.82rem',
+        borderTop: `1px solid ${theme.darkMode ? '#1a1a1a' : '#ddd'}`,
       }}>
         Propulsé par{' '}
-        <a href="/" style={{ color: theme.primaryColor, textDecoration: 'none', fontFamily: `'${theme.font}', sans-serif`, fontSize: '0.78rem' }}>
+        <a href="/" style={{
+          color: primaryColor, textDecoration: 'none',
+          fontFamily: `'Orbitron', sans-serif`, fontSize: '0.78rem',
+          letterSpacing: '2px',
+        }}>
           THE CIRCLE
         </a>
       </footer>

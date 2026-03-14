@@ -24,11 +24,26 @@ export default async function DashboardLayout({ children, params }: Props) {
   if (!community) redirect('/dashboard')
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a' }}>
-      <DashboardSidebar community={community} currentSlug={slug} />
-      <main style={{ flex: 1, marginLeft: '240px', minHeight: '100vh' }}>
-        {children}
-      </main>
-    </div>
+    <>
+      <style>{`
+        .tc-main {
+          flex: 1;
+          margin-left: 240px;
+          min-height: 100vh;
+        }
+        @media (max-width: 768px) {
+          .tc-main {
+            margin-left: 0 !important;
+            padding-top: 56px;
+          }
+        }
+      `}</style>
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a' }}>
+        <DashboardSidebar community={community} currentSlug={slug} />
+        <main className="tc-main">
+          {children}
+        </main>
+      </div>
+    </>
   )
 }

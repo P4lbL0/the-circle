@@ -55,7 +55,7 @@ const MODULE_CONFIG = [
     label: 'Paris Internes',
     icon: '🎲',
     desc: 'Mises en points fictifs entre membres',
-    plans: ['free', 'starter', 'pro'],
+    plans: ['starter', 'pro'],
   },
   {
     key: 'tournaments',
@@ -68,8 +68,8 @@ const MODULE_CONFIG = [
     key: 'shop',
     label: 'Boutique',
     icon: '🛍️',
-    desc: 'Articles virtuels et physiques contre des points',
-    plans: ['starter', 'pro'],
+    desc: 'Articles virtuels contre des points (physiques en Pro)',
+    plans: ['free', 'starter', 'pro'],
   },
 ]
 

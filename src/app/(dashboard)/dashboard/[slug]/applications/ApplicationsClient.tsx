@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getMemberLimit } from '@/lib/plan-limits'
 
 // ── Types ─────────────────────────────────────────────────
 interface Application {
   id:              string
+  applicant_id:    string | null
   applicant_name:  string | null
   applicant_email: string | null
   answers:         Record<string, any>
@@ -88,11 +90,29 @@ export function ApplicationsClient({ community, initialApplications, formFields,
       ))
       if (selected?.id === id) setSelected(prev => prev ? { ...prev, status, notes: notes || null } : null)
 
-      // Si accepté → créer le membre si applicant_id existe
+      // Si accepté → créer le membre automatiquement si applicant_id existe
       if (status === 'accepted') {
         const app = applications.find(a => a.id === id)
-        // Note: si l'applicant a un compte, on pourrait l'ajouter automatiquement
-        // Pour l'instant on notifie juste l'Owner
+        if (app?.applicant_id) {
+          // Vérifier la limite de membres avant d'ajouter
+          const { count } = await supabase
+            .from('community_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('community_id', community.id)
+
+          const limit = getMemberLimit(community.subscription_tier)
+          if ((count ?? 0) >= limit) {
+            showToast(`Limite de ${limit} membres atteinte (plan ${community.subscription_tier.toUpperCase()})`)
+            setSaving(false)
+            return
+          }
+
+          await supabase.from('community_members').upsert({
+            community_id: community.id,
+            profile_id:   app.applicant_id,
+            role:         'member',
+          }, { onConflict: 'community_id,profile_id' })
+        }
       }
 
       showToast(
@@ -178,6 +198,28 @@ export function ApplicationsClient({ community, initialApplications, formFields,
 
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh', fontFamily: "'Rajdhani', sans-serif", color: '#e0e0e0' }}>
+      <style>{`
+        .app-header { padding: 14px 30px !important; }
+        .app-content { max-width: 1200px; margin: 0 auto; padding: 30px; }
+        .app-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .app-grid.has-panel { grid-template-columns: 1fr 420px; }
+        .app-panel { position: sticky; top: 80px; max-height: calc(100vh - 100px); overflow-y: auto; height: fit-content; }
+        .app-back-btn { display: none; }
+        .app-table-row { display: grid; grid-template-columns: 1fr 120px 80px auto; gap: 12px; align-items: center; padding: 14px 18px; }
+        @media (max-width: 900px) {
+          .app-grid.has-panel { grid-template-columns: 1fr !important; }
+          .app-panel { position: static !important; max-height: none !important; }
+          .app-back-btn { display: flex !important; align-items: center; gap: 8px; background: transparent; border: 1px solid #2a2a2a; color: #888; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: Rajdhani; font-size: 0.85rem; margin-bottom: 16px; }
+        }
+        @media (max-width: 640px) {
+          .app-header { padding: 12px 16px !important; }
+          .app-header-title { font-size: 0.75rem !important; }
+          .app-content { padding: 16px !important; }
+          .app-table-row { grid-template-columns: 1fr auto !important; }
+          .app-table-date { display: none; }
+          .app-table-status { display: none; }
+        }
+      `}</style>
 
       {/* Toast */}
       {toast && (
@@ -193,13 +235,13 @@ export function ApplicationsClient({ community, initialApplications, formFields,
       )}
 
       {/* Header */}
-      <div style={{
+      <div className="app-header" style={{
         background: '#0d0d0d', borderBottom: '2px solid #FFC107',
-        padding: '14px 30px', display: 'flex', alignItems: 'center',
+        display: 'flex', alignItems: 'center',
         justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ fontFamily: 'Orbitron', fontSize: '0.9rem', color: 'white', textTransform: 'uppercase', letterSpacing: '2px' }}>
+          <span className="app-header-title" style={{ fontFamily: 'Orbitron', fontSize: '0.9rem', color: 'white', textTransform: 'uppercase', letterSpacing: '2px' }}>
             Candidatures
           </span>
           <span style={{ background: '#1a1a1a', color: '#FFC107', border: '1px solid #333', padding: '3px 10px', borderRadius: '20px', fontSize: '0.8rem', fontFamily: 'Orbitron' }}>
@@ -233,7 +275,7 @@ export function ApplicationsClient({ community, initialApplications, formFields,
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px' }}>
+      <div className="app-content">
 
         {/* Form Builder */}
         {showFormBuilder && (
@@ -357,7 +399,7 @@ export function ApplicationsClient({ community, initialApplications, formFields,
         </div>
 
         {/* Layout liste + détail */}
-        <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 420px' : '1fr', gap: '20px' }}>
+        <div className={`app-grid${selected ? ' has-panel' : ''}`}>
 
           {/* Liste */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -421,13 +463,11 @@ export function ApplicationsClient({ community, initialApplications, formFields,
 
           {/* Détail candidature */}
           {selected && (
-            <div style={{
+            <div className="app-panel" style={{
               background: '#111', border: '1px solid #FFC107',
               borderRadius: '12px', padding: '26px',
-              position: 'sticky', top: '80px',
-              maxHeight: 'calc(100vh - 100px)', overflowY: 'auto',
-              height: 'fit-content',
             }}>
+              <button className="app-back-btn" onClick={() => setSelected(null)}>← Retour</button>
               {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                 <div>

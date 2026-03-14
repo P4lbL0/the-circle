@@ -147,7 +147,6 @@ export function StatsSchemaClient({ community, initialSchema }: {
 
   // ── Prévisualiser le calcul ─────────────────────────────
   const previewFormula = () => {
-    if (typeof window === 'undefined') return null  // ← fix hydration
     try {
       const testValues: Record<string, number> = {}
       fields.filter(f => f.type === 'number' || f.type === 'percentage')
