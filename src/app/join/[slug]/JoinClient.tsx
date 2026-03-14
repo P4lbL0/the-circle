@@ -43,7 +43,7 @@ export function JoinClient({ community, token }: {
 
     const supabase = createClient()
     const redirectTo =
-      `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/join/${community.slug}?token=${token}`)}`
+      `${window.location.origin}/auth/confirm?next=${encodeURIComponent(`/join/${community.slug}?token=${token}`)}`
 
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email,
