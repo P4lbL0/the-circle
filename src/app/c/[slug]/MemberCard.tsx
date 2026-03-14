@@ -14,12 +14,15 @@ interface Theme {
   darkMode:     boolean
 }
 
-export function MemberCard({ member, rank, theme, statFields, formulaLabel }: {
-  member:       any
-  rank:         number
-  theme:        Theme
-  statFields:   StatField[]
-  formulaLabel: string
+export function MemberCard({ member, rank, theme, statFields, formulaLabel, currentUserId, isAdmin, slug }: {
+  member:        any
+  rank:          number
+  theme:         Theme
+  statFields:    StatField[]
+  formulaLabel:  string
+  currentUserId?: string
+  isAdmin?:      boolean
+  slug?:         string
 }) {
   const profile     = member.profiles
   const displayName = profile?.display_name ?? profile?.email?.split('@')[0] ?? '???'
@@ -114,6 +117,35 @@ export function MemberCard({ member, rank, theme, statFields, formulaLabel }: {
               {badge.name ?? badge}
             </span>
           ))}
+        </div>
+      )}
+
+      {/* Bouton admin (visible uniquement pour l'owner sur sa propre carte) */}
+      {isAdmin && currentUserId && member.profile_id === currentUserId && slug && (
+        <div style={{ padding: '12px 18px', borderTop: `1px solid ${theme.darkMode ? '#222' : '#eee'}` }}>
+          <a
+            href={`/dashboard/${slug}`}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              padding: '8px 12px',
+              background: `${theme.primaryColor}18`,
+              border: `1px solid ${theme.primaryColor}`,
+              borderRadius: '4px',
+              color: theme.primaryColor,
+              fontFamily: `'Orbitron', sans-serif`,
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              textDecoration: 'none',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${theme.primaryColor}35` }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = `${theme.primaryColor}18` }}
+          >
+            ⚙ Administrer
+          </a>
         </div>
       )}
 

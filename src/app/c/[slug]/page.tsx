@@ -19,6 +19,9 @@ export default async function CommunityVitrinePage({ params }: Props) {
 
   if (!community) notFound()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = !!user && user.id === community.owner_id
+
   const theme = community.theme_json as {
     primaryColor: string
     accentColor:  string
@@ -561,6 +564,9 @@ export default async function CommunityVitrinePage({ params }: Props) {
               theme={theme}
               statFields={statFields}
               formulaLabel={formulaConfig?.label ?? 'Score'}
+              currentUserId={user?.id}
+              isAdmin={isAdmin}
+              slug={slug}
             />
           ))}
         </div>
