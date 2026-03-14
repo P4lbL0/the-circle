@@ -725,7 +725,7 @@ export default function AppearancePage() {
                       {name[0]}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: `'${theme.font}', sans-serif`, fontSize: '0.78rem', color: theme.darkMode ? 'white' : '#111', fontWeight: 600, truncate: 'ellipsis' }}>{name}</div>
+                      <div style={{ fontFamily: `'${theme.font}', sans-serif`, fontSize: '0.78rem', color: theme.darkMode ? 'white' : '#111', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
                       <div style={{ fontSize: '0.62rem', color: theme.accentColor }}>membre</div>
                     </div>
                     <div style={{ fontFamily: 'Orbitron', fontSize: '0.78rem', color: primaryColor, fontWeight: 700, flexShrink: 0 }}>
