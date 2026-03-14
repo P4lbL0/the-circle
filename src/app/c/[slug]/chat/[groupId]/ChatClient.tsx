@@ -78,9 +78,10 @@ export function ChatClient({ community, group, initialMessages, userId, isMember
           .eq('id', (payload.new as { id: string }).id)
           .single()
         if (data) {
+          const msg = data as unknown as Message
           setMessages(prev => {
-            if (prev.some(m => m.id === data.id)) return prev
-            return [...prev, data]
+            if (prev.some(m => m.id === msg.id)) return prev
+            return [...prev, msg]
           })
         }
       })
@@ -113,7 +114,8 @@ export function ChatClient({ community, group, initialMessages, userId, isMember
       .single()
 
     if (!error && data) {
-      setMessages(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data])
+      const msg = data as unknown as Message
+      setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
     }
     setSending(false)
     inputRef.current?.focus()
