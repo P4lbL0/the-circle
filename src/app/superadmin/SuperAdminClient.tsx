@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 type Tier = 'free' | 'starter' | 'pro'
@@ -144,9 +145,9 @@ export function SuperAdminClient({ adminName, adminId, communities, stats, initi
           <div style={{ background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.2)', borderRadius: '999px', padding: '4px 12px', fontSize: '0.8rem', color: '#FFC107', fontWeight: 600 }}>
             {adminName}
           </div>
-          <a href="/dashboard" style={{ background: '#1c1c1f', border: '1px solid #27272a', borderRadius: '6px', padding: '7px 14px', color: '#71717a', textDecoration: 'none', fontSize: '0.8rem', transition: 'color 0.15s' }}>
+          <Link href="/dashboard" style={{ background: '#1c1c1f', border: '1px solid #27272a', borderRadius: '6px', padding: '7px 14px', color: '#71717a', textDecoration: 'none', fontSize: '0.8rem', transition: 'color 0.15s' }}>
             ← Dashboard
-          </a>
+          </Link>
         </div>
       </header>
 

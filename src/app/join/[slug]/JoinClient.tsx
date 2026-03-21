@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 interface Community {
@@ -173,7 +174,7 @@ export function JoinClient({ community, token }: {
               <div style={{ flex: 1, height: '1px', background: bord }} />
             </div>
 
-            <a
+            <Link
               href={`/login?redirect=/join/${community.slug}?token=${token}`}
               style={{
                 display: 'block', background: 'transparent',
@@ -185,11 +186,11 @@ export function JoinClient({ community, token }: {
               }}
             >
               J'ai déjà un compte
-            </a>
+            </Link>
 
-            <a href={`/c/${community.slug}`} style={{ color: muted, fontSize: '0.8rem', marginTop: '4px' }}>
+            <Link href={`/c/${community.slug}`} style={{ color: muted, fontSize: '0.8rem', marginTop: '4px' }}>
               Voir la vitrine sans rejoindre →
-            </a>
+            </Link>
           </div>
         )}
       </div>

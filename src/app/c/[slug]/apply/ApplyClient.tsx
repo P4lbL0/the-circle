@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 interface FormField {
@@ -116,7 +117,7 @@ export function ApplyClient({ community, formFields }: {
         borderBottom: `2px solid ${theme.primaryColor}`,
         padding: '15px 30px', display: 'flex', alignItems: 'center', gap: '16px',
       }}>
-        <a href={`/c/${community.slug}`} style={{ color: muted, textDecoration: 'none', fontSize: '1.2rem' }}>←</a>
+        <Link href={`/c/${community.slug}`} style={{ color: muted, textDecoration: 'none', fontSize: '1.2rem' }}>←</Link>
         {community.logo_url && (
           <img src={community.logo_url} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover', border: `1px solid ${theme.primaryColor}` }} />
         )}
@@ -141,14 +142,14 @@ export function ApplyClient({ community, formFields }: {
             <p style={{ color: muted, fontSize: '1rem', lineHeight: 1.6, margin: '0 0 24px' }}>
               L'équipe de <strong style={{ color: theme.primaryColor }}>{community.name}</strong> examinera ta candidature et te contactera par email.
             </p>
-            <a href={`/c/${community.slug}`} style={{
+            <Link href={`/c/${community.slug}`} style={{
               display: 'inline-block', background: theme.primaryColor,
               color: '#000', fontFamily: `'${theme.font}', sans-serif`,
               fontWeight: 'bold', padding: '11px 26px', borderRadius: '4px',
               textDecoration: 'none', textTransform: 'uppercase', fontSize: '0.82rem',
             }}>
               Retour à la vitrine
-            </a>
+            </Link>
           </div>
         ) : (
           <div style={{ background: panel, border: `1px solid ${bord}`, borderRadius: '16px', padding: '36px', boxShadow: theme.darkMode ? '0 0 30px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.08)' }}>

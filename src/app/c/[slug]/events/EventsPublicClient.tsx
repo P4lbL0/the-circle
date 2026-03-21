@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 type RsvpCounts = { going: number; maybe: number; not_going: number }
@@ -157,7 +158,7 @@ export function EventsPublicClient({ community, events, userId, initialRsvps }: 
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&family=Oswald:wght@600&family=Montserrat:wght@600&family=Inter:wght@500;600&display=swap');`}</style>
 
       <header style={{ background: theme.darkMode ? '#0d0d0d' : '#fff', borderBottom: `2px solid ${theme.primaryColor}`, padding: '15px 30px', display: 'flex', alignItems: 'center', gap: '16px', position: 'sticky', top: 0, zIndex: 100 }}>
-        <a href={`/c/${community.slug}`} style={{ color: muted, textDecoration: 'none', fontSize: '1.2rem' }}>←</a>
+        <Link href={`/c/${community.slug}`} style={{ color: muted, textDecoration: 'none', fontSize: '1.2rem' }}>←</Link>
         {community.logo_url && <img src={community.logo_url} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover' }} />}
         <h1 style={{ margin: 0, fontFamily: `'${theme.font}', sans-serif`, fontSize: '1rem', color: theme.darkMode ? 'white' : '#111', textTransform: 'uppercase', letterSpacing: '2px' }}>
           {community.name} — Événements
@@ -169,9 +170,9 @@ export function EventsPublicClient({ community, events, userId, initialRsvps }: 
         {!userId && (
           <div style={{ background: `${theme.primaryColor}10`, border: `1px solid ${theme.primaryColor}33`, borderRadius: '10px', padding: '14px 18px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.88rem', color: muted }}>Connecte-toi pour indiquer ta participation</span>
-            <a href={`/login?redirect=/c/${community.slug}/events`} style={{ background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '7px 16px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.78rem', textTransform: 'uppercase' }}>
+            <Link href={`/login?redirect=/c/${community.slug}/events`} style={{ background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '7px 16px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.78rem', textTransform: 'uppercase' }}>
               Connexion
-            </a>
+            </Link>
           </div>
         )}
 

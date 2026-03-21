@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound }     from 'next/navigation'
+import Link from 'next/link'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -46,15 +47,15 @@ export default async function PublicChatPage({ params }: Props) {
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap');`}</style>
 
       <header style={{ background: theme.darkMode ? '#0d0d0d' : '#fff', borderBottom: `2px solid ${theme.primaryColor}`, padding: '15px 30px', display: 'flex', alignItems: 'center', gap: '16px', position: 'sticky', top: 0, zIndex: 100 }}>
-        <a href={`/c/${community.slug}`} style={{ color: muted, textDecoration: 'none', fontSize: '1.2rem' }}>←</a>
+        <Link href={`/c/${community.slug}`} style={{ color: muted, textDecoration: 'none', fontSize: '1.2rem' }}>←</Link>
         {community.logo_url && <img src={community.logo_url} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover' }} />}
         <h1 style={{ margin: 0, fontFamily: `'${theme.font}', sans-serif`, fontSize: '1rem', color: theme.darkMode ? 'white' : '#111', textTransform: 'uppercase', letterSpacing: '2px' }}>
           {community.name} — Chat
         </h1>
         {!user && (
-          <a href={`/login?redirect=/c/${community.slug}/chat`} style={{ marginLeft: 'auto', background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '7px 16px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.78rem', textTransform: 'uppercase' }}>
+          <Link href={`/login?redirect=/c/${community.slug}/chat`} style={{ marginLeft: 'auto', background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '7px 16px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.78rem', textTransform: 'uppercase' }}>
             Connexion
-          </a>
+          </Link>
         )}
       </header>
 

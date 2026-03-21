@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { safeEval } from '@/lib/safe-eval'
 
 interface Props {
@@ -83,7 +84,7 @@ export default async function LeaderboardPage({ params }: Props) {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         position: 'sticky', top: 0, zIndex: 1000,
       }}>
-        <a href={`/c/${slug}`} style={{
+        <Link href={`/c/${slug}`} style={{
           display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none',
         }}>
           {community.logo_url && (
@@ -97,14 +98,14 @@ export default async function LeaderboardPage({ params }: Props) {
           }}>
             {community.name}
           </span>
-        </a>
-        <a href={`/c/${slug}`} style={{
+        </Link>
+        <Link href={`/c/${slug}`} style={{
           fontFamily: `'${theme.font}', sans-serif`, fontSize: '0.72rem',
           color: muted, border: `1px solid ${theme.darkMode ? '#333' : '#ddd'}`,
           padding: '7px 14px', borderRadius: '4px', textDecoration: 'none',
         }}>
           ← Retour à la vitrine
-        </a>
+        </Link>
       </header>
 
       {/* Title */}
@@ -230,9 +231,9 @@ export default async function LeaderboardPage({ params }: Props) {
       {/* Footer */}
       <div style={{ textAlign: 'center', padding: '20px', color: muted, fontSize: '0.72rem', letterSpacing: '2px' }}>
         PROPULSÉ PAR{' '}
-        <a href="/" style={{ color: theme.primaryColor, textDecoration: 'none', fontFamily: 'Orbitron', fontSize: '0.72rem' }}>
+        <Link href="/" style={{ color: theme.primaryColor, textDecoration: 'none', fontFamily: 'Orbitron', fontSize: '0.72rem' }}>
           THE CIRCLE
-        </a>
+        </Link>
       </div>
     </div>
   )

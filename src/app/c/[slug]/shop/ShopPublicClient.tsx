@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 interface ShopItem {
@@ -104,7 +105,7 @@ export function ShopPublicClient({ community, items, userId, memberPoints, isMem
       {/* Header */}
       <header style={{ background: theme.darkMode ? '#0d0d0d' : '#fff', borderBottom: `2px solid ${theme.primaryColor}`, padding: '15px 30px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <a href={`/c/${community.slug}`} style={{ color: muted, textDecoration: 'none', fontSize: '1.2rem' }}>←</a>
+          <Link href={`/c/${community.slug}`} style={{ color: muted, textDecoration: 'none', fontSize: '1.2rem' }}>←</Link>
           {community.logo_url && <img src={community.logo_url} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover' }} />}
           <h1 style={{ margin: 0, fontFamily: `'${theme.font}', sans-serif`, fontSize: '0.95rem', color: theme.darkMode ? 'white' : '#111', textTransform: 'uppercase', letterSpacing: '2px' }}>
             Boutique
@@ -171,9 +172,9 @@ export function ShopPublicClient({ community, items, userId, memberPoints, isMem
                     </div>
 
                     {!userId ? (
-                      <a href={`/login?redirect=/c/${community.slug}/shop`} style={{ display: 'block', textAlign: 'center', background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '9px', borderRadius: '6px', textDecoration: 'none', fontSize: '0.82rem', textTransform: 'uppercase', marginTop: '4px' }}>
+                      <Link href={`/login?redirect=/c/${community.slug}/shop`} style={{ display: 'block', textAlign: 'center', background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '9px', borderRadius: '6px', textDecoration: 'none', fontSize: '0.82rem', textTransform: 'uppercase', marginTop: '4px' }}>
                         Connexion pour acheter
-                      </a>
+                      </Link>
                     ) : !isMember ? (
                       <div style={{ textAlign: 'center', color: muted, fontSize: '0.8rem', padding: '8px', background: `${bord}40`, borderRadius: '6px', marginTop: '4px' }}>
                         Rejoins la communauté pour acheter
@@ -204,9 +205,9 @@ export function ShopPublicClient({ community, items, userId, memberPoints, isMem
         {!isMember && userId && (
           <div style={{ marginTop: '40px', background: `${theme.primaryColor}10`, border: `1px solid ${theme.primaryColor}33`, borderRadius: '12px', padding: '24px', textAlign: 'center' }}>
             <p style={{ margin: '0 0 14px', color: muted }}>Tu dois être membre de la communauté pour acheter des articles.</p>
-            <a href={`/c/${community.slug}/apply`} style={{ background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '10px 24px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.82rem', textTransform: 'uppercase' }}>
+            <Link href={`/c/${community.slug}/apply`} style={{ background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '10px 24px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.82rem', textTransform: 'uppercase' }}>
               Rejoindre
-            </a>
+            </Link>
           </div>
         )}
       </div>

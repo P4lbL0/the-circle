@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { MemberCard } from './MemberCard'
 import { safeEval } from '@/lib/safe-eval'
 import { VitrineBell } from './VitrineBell'
@@ -266,19 +267,19 @@ export default async function CommunityVitrinePage({ params }: Props) {
         {/* Right: nav links + login/user */}
         <div className="vit-header-nav" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           {visibleModules.includes('scores') && (
-            <a href={`/c/${slug}/leaderboard`} className="vit-header-link">🏆 Classement</a>
+            <Link href={`/c/${slug}/leaderboard`} className="vit-header-link">🏆 Classement</Link>
           )}
           {visibleModules.includes('calendar') && (
-            <a href={`/c/${slug}/events`} className="vit-header-link">📅 Événements</a>
+            <Link href={`/c/${slug}/events`} className="vit-header-link">📅 Événements</Link>
           )}
           {visibleModules.includes('tournaments') && (
-            <a href={`/c/${slug}/tournaments`} className="vit-header-link">🥊 Tournois</a>
+            <Link href={`/c/${slug}/tournaments`} className="vit-header-link">🥊 Tournois</Link>
           )}
           {visibleModules.includes('forum') && (
-            <a href={`/c/${slug}/chat`} className="vit-header-link">💬 Chat</a>
+            <Link href={`/c/${slug}/chat`} className="vit-header-link">💬 Chat</Link>
           )}
           {visibleModules.includes('shop') && (
-            <a href={`/c/${slug}/shop`} className="vit-header-link">🛍️ Boutique</a>
+            <Link href={`/c/${slug}/shop`} className="vit-header-link">🛍️ Boutique</Link>
           )}
           {user && (
             <VitrineBell
@@ -300,7 +301,7 @@ export default async function CommunityVitrinePage({ params }: Props) {
               {currentDisplayName}
             </span>
           ) : (
-            <a href={`/login?redirect=/c/${slug}`} style={{
+            <Link href={`/login?redirect=/c/${slug}`} style={{
               marginLeft: '12px',
               fontFamily: `'Orbitron', sans-serif`, fontSize: '0.72rem',
               color: primaryColor, border: `1px solid ${primaryColor}`,
@@ -308,7 +309,7 @@ export default async function CommunityVitrinePage({ params }: Props) {
               textTransform: 'uppercase', letterSpacing: '1px',
             }}>
               Connexion
-            </a>
+            </Link>
           )}
         </div>
       </header>
@@ -419,9 +420,9 @@ export default async function CommunityVitrinePage({ params }: Props) {
 
           {/* Join button — masqué si déjà membre */}
           {!isMember && activeModules.includes('applications') && (
-            <a href={`/c/${slug}/apply`} className="vit-join-btn">
+            <Link href={`/c/${slug}/apply`} className="vit-join-btn">
               Rejoindre la communauté
-            </a>
+            </Link>
           )}
         </div>
       </section>
@@ -437,19 +438,19 @@ export default async function CommunityVitrinePage({ params }: Props) {
         }}>
           <div className="vit-module-nav-scroll" style={{ display: 'flex', maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
             {visibleModules.includes('scores') && (
-              <a href={`/c/${slug}/leaderboard`} className="vit-nav-link">🏆 Classement</a>
+              <Link href={`/c/${slug}/leaderboard`} className="vit-nav-link">🏆 Classement</Link>
             )}
             {visibleModules.includes('calendar') && (
-              <a href={`/c/${slug}/events`} className="vit-nav-link">📅 Événements</a>
+              <Link href={`/c/${slug}/events`} className="vit-nav-link">📅 Événements</Link>
             )}
             {visibleModules.includes('tournaments') && (
-              <a href={`/c/${slug}/tournaments`} className="vit-nav-link">🥊 Tournois</a>
+              <Link href={`/c/${slug}/tournaments`} className="vit-nav-link">🥊 Tournois</Link>
             )}
             {visibleModules.includes('forum') && (
-              <a href={`/c/${slug}/chat`} className="vit-nav-link">💬 Chat</a>
+              <Link href={`/c/${slug}/chat`} className="vit-nav-link">💬 Chat</Link>
             )}
             {visibleModules.includes('shop') && (
-              <a href={`/c/${slug}/shop`} className="vit-nav-link">🛍️ Boutique</a>
+              <Link href={`/c/${slug}/shop`} className="vit-nav-link">🛍️ Boutique</Link>
             )}
           </div>
         </nav>
@@ -611,13 +612,13 @@ export default async function CommunityVitrinePage({ params }: Props) {
         borderTop: `1px solid ${theme.darkMode ? '#1a1a1a' : '#ddd'}`,
       }}>
         Propulsé par{' '}
-        <a href="/" style={{
+        <Link href="/" style={{
           color: primaryColor, textDecoration: 'none',
           fontFamily: `'Orbitron', sans-serif`, fontSize: '0.78rem',
           letterSpacing: '2px',
         }}>
           THE CIRCLE
-        </a>
+        </Link>
       </footer>
     </div>
   )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 interface Message {
@@ -187,7 +188,7 @@ export function ChatClient({ community, group, initialMessages, userId, isMember
 
       {/* ── Header ── */}
       <header className="chat-header-inner" style={{ background: theme.darkMode ? '#0d0d0d' : '#fff', borderBottom: `2px solid ${theme.primaryColor}`, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0, zIndex: 10 }}>
-        <a href={`/c/${community.slug}/chat`} style={{ color: muted, textDecoration: 'none', fontSize: '1.3rem', lineHeight: 1 }}>←</a>
+        <Link href={`/c/${community.slug}/chat`} style={{ color: muted, textDecoration: 'none', fontSize: '1.3rem', lineHeight: 1 }}>←</Link>
         <div style={{ width: '38px', height: '38px', borderRadius: '9px', background: `${theme.primaryColor}18`, border: `1px solid ${theme.primaryColor}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
           💬
         </div>
@@ -200,9 +201,9 @@ export function ChatClient({ community, group, initialMessages, userId, isMember
           )}
         </div>
         {!userId && (
-          <a href={`/login?redirect=/c/${community.slug}/chat/${group.id}`} style={{ background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '6px 14px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.75rem', textTransform: 'uppercase', flexShrink: 0 }}>
+          <Link href={`/login?redirect=/c/${community.slug}/chat/${group.id}`} style={{ background: theme.primaryColor, color: '#000', fontFamily: `'${theme.font}', sans-serif`, fontWeight: 'bold', padding: '6px 14px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.75rem', textTransform: 'uppercase', flexShrink: 0 }}>
             Connexion
-          </a>
+          </Link>
         )}
       </header>
 
@@ -332,9 +333,9 @@ export function ChatClient({ community, group, initialMessages, userId, isMember
           </div>
         ) : !userId ? (
           <div style={{ textAlign: 'center', padding: '8px 0' }}>
-            <a href={`/login?redirect=/c/${community.slug}/chat/${group.id}`} style={{ color: theme.primaryColor, textDecoration: 'none', fontSize: '0.88rem', fontFamily: `'${theme.font}', sans-serif`, textTransform: 'uppercase', letterSpacing: '1px' }}>
+            <Link href={`/login?redirect=/c/${community.slug}/chat/${group.id}`} style={{ color: theme.primaryColor, textDecoration: 'none', fontSize: '0.88rem', fontFamily: `'${theme.font}', sans-serif`, textTransform: 'uppercase', letterSpacing: '1px' }}>
               Connexion pour participer →
-            </a>
+            </Link>
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '8px 0', color: muted, fontSize: '0.82rem' }}>
