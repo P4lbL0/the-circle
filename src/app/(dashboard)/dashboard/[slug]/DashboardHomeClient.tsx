@@ -121,17 +121,19 @@ export function DashboardHomeClient({ community, userId, canManage, stats, initi
   const unreadCount = announcements.filter(a => !a.isRead).length
 
   return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh', fontFamily: "'Rajdhani', sans-serif", color: '#e0e0e0' }}>
+    <div style={{ background: '#0a0a0a', minHeight: '100vh', fontFamily: "'Rajdhani', sans-serif", color: '#e0e0e0', overflowX: 'hidden' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
 
-        .dh-stats   { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .dh-actions { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+        .dh-stats      { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .dh-actions    { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
         .dh-actions::-webkit-scrollbar { display: none; }
-        .dh-grid    { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .dh-topbar     { display: flex; }
 
-        @media (max-width: 640px) {
-          .dh-stats { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 768px) {
+          .dh-stats  { grid-template-columns: repeat(2, 1fr); }
+          /* La topbar est déjà fournie par la sidebar mobile — on la masque */
+          .dh-topbar { display: none; }
         }
       `}</style>
 
@@ -149,10 +151,10 @@ export function DashboardHomeClient({ community, userId, canManage, stats, initi
         </div>
       )}
 
-      {/* ── Topbar page ── */}
-      <div style={{
+      {/* ── Topbar page (desktop uniquement) ── */}
+      <div className="dh-topbar" style={{
         background: '#0d0d0d', borderBottom: '2px solid #FFC107',
-        padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '14px',
+        padding: '14px 24px', alignItems: 'center', gap: '14px',
         position: 'sticky', top: 0, zIndex: 100,
       }}>
         {community.logo_url && (

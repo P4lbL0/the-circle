@@ -68,13 +68,16 @@ export function DashboardSidebar({ community }: {
           transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* ── Bell : visible uniquement dans la sidebar desktop ── */
+        .tc-desktop-bell { display: flex; }
         /* ── Mobile topbar ── */
         .tc-mobile-bar {
           display: none;
           position: fixed; top: 0; left: 0; right: 0; height: 52px;
           background: #0d0d0d; border-bottom: 1px solid #1a1a1a;
-          align-items: center; padding: 0 14px;
-          z-index: 198; gap: 12px;
+          align-items: center; padding: 0 10px;
+          z-index: 198; gap: 8px;
+          overflow: hidden;
         }
         .tc-hamburger {
           display: none;
@@ -157,11 +160,13 @@ export function DashboardSidebar({ community }: {
             transform: translateX(0);
             box-shadow: 8px 0 40px rgba(0,0,0,0.9);
           }
-          .tc-mobile-bar { display: flex; }
+          .tc-mobile-bar  { display: flex; }
           .tc-hamburger   { display: flex; }
           .tc-backdrop.tc-visible { display: block; }
           .tc-close-btn   { display: flex; }
           .tc-bottom-nav  { display: block; }
+          /* Masque la cloche dans le drawer mobile (déjà dans la topbar) */
+          .tc-desktop-bell { display: none !important; }
         }
       `}</style>
 
@@ -205,7 +210,9 @@ export function DashboardSidebar({ community }: {
                 {community.subscription_tier}
               </div>
             </div>
-            <DashboardBell communityId={community.id} />
+            <span className="tc-desktop-bell">
+              <DashboardBell communityId={community.id} />
+            </span>
           </div>
 
           <a href={`/c/${community.slug}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '7px 12px', color: '#666', fontSize: '0.78rem', textDecoration: 'none', transition: 'all 0.15s' }}

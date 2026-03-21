@@ -38,6 +38,24 @@ export default async function DashboardLayout({ children, params }: Props) {
     if (!membership) redirect('/dashboard')
   }
 
+  // Auto-ajoute l'owner dans community_members (nécessaire pour RLS annonces etc.)
+  if (isOwner) {
+    const { data: ownerMember } = await supabase
+      .from('community_members')
+      .select('id')
+      .eq('community_id', community.id)
+      .eq('profile_id', user.id)
+      .single()
+
+    if (!ownerMember) {
+      await supabase.from('community_members').insert({
+        community_id: community.id,
+        profile_id:   user.id,
+        role:         'owner',
+      })
+    }
+  }
+
   return (
     <>
       <style>{`
@@ -45,10 +63,13 @@ export default async function DashboardLayout({ children, params }: Props) {
           flex: 1;
           margin-left: 240px;
           min-height: 100vh;
+          max-width: calc(100vw - 240px);
+          overflow-x: hidden;
         }
         @media (max-width: 768px) {
           .tc-main {
             margin-left: 0 !important;
+            max-width: 100vw;
             padding-top: 52px;
             padding-bottom: 60px;
           }

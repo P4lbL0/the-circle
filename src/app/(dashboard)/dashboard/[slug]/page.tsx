@@ -50,7 +50,7 @@ export default async function DashboardHomePage({ params }: Props) {
     supabase.from('community_members').select('*', { count: 'exact', head: true })
       .eq('community_id', community.id).eq('role', 'pending'),
     supabase.from('events').select('*', { count: 'exact', head: true })
-      .eq('community_id', community.id).gte('start_at', new Date().toISOString()).is('parent_event_id', null),
+      .eq('community_id', community.id).gte('start_at', new Date().toISOString()),
     supabase.from('features').select('module').eq('community_id', community.id).eq('enabled', true),
   ])
 
