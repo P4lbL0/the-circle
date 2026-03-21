@@ -51,13 +51,6 @@ const MODULE_CONFIG = [
     plans: ['free', 'starter', 'pro'],
   },
   {
-    key: 'bets',
-    label: 'Paris Internes',
-    icon: '🎲',
-    desc: 'Mises en points fictifs entre membres',
-    plans: ['starter', 'pro'],
-  },
-  {
     key: 'tournaments',
     label: 'Tournois & Brackets',
     icon: '🥊',
@@ -331,7 +324,7 @@ export function ModulesClient({ community, initialFeatures }: {
               Débloquer tous les modules
             </h3>
             <p style={{ color: '#666', fontSize: '0.88rem', margin: '0 0 16px' }}>
-              Passe au plan Starter pour accéder aux Tournois et à la Boutique.
+              Passe au plan Starter pour accéder aux Tournois, à l'Analyse et à la Boutique.
             </p>
             <button style={{
               background: '#FFC107', color: '#000', border: 'none',

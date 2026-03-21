@@ -20,7 +20,6 @@ const NAV_ITEMS = [
   { href: '/applications', icon: '📋', label: 'Candidatures'   },
   { href: '/events',       icon: '📅', label: 'Événements'     },
   { href: '/tournaments',  icon: '🏆', label: 'Tournois'       },
-  { href: '/bets',         icon: '🎲', label: 'Paris'          },
   { href: '/chat',         icon: '💬', label: 'Chat'           },
   { href: '/shop',         icon: '🛒', label: 'Boutique'       },
   { href: '/appearance',   icon: '🎨', label: 'Apparence'      },

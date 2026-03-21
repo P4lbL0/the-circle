@@ -21,14 +21,13 @@ export const SOFT_LIMITS: Record<Tier, {
 // ── Accès modules ─────────────────────────────────────────
 export const MODULE_ACCESS: Record<Tier, {
   tournaments:   boolean
-  bets:          boolean
   physical_shop: boolean
   analytics:     boolean
   export_csv:    boolean
 }> = {
-  free:    { tournaments: false, bets: false, physical_shop: false, analytics: false, export_csv: false },
-  starter: { tournaments: true,  bets: true,  physical_shop: false, analytics: true,  export_csv: false },
-  pro:     { tournaments: true,  bets: true,  physical_shop: true,  analytics: true,  export_csv: true  },
+  free:    { tournaments: false, physical_shop: false, analytics: false, export_csv: false },
+  starter: { tournaments: true,  physical_shop: false, analytics: true,  export_csv: false },
+  pro:     { tournaments: true,  physical_shop: true,  analytics: true,  export_csv: true  },
 }
 
 // ── Helpers ───────────────────────────────────────────────

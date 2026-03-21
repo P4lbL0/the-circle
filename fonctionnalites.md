@@ -1,6 +1,6 @@
 # Fonctionnalités — The Circle
 
-Dernière mise à jour : 21/03/2026
+Dernière mise à jour : 21/03/2026 (session 2)
 
 ---
 
@@ -71,11 +71,11 @@ Dernière mise à jour : 21/03/2026
 ### Modules Communautaires
 | Fonctionnalité | Comment ça marche |
 |---|---|
+| **Lien Événement ↔ Tournoi** | À la création d'un événement : créer un nouveau tournoi (avec template) ou lier un tournoi existant. Si récurrent, génère 1 tournoi par occurrence. Chaque tournoi reste modifiable indépendamment. |
 | **Chat temps réel** | Supabase Realtime, groupes de discussion, messages persistés |
 | **Forum** | Topics/threads, table `forum_threads` + `forum_posts` |
-| **Événements** | Récurrents (hebdo/mensuel), table `events` avec `recurrence_json` |
-| **Tournois** | Statuts draft/open/ongoing/completed/cancelled, table `tournaments` |
-| **Paris** | Système de paris entre membres, table `bets` |
+| **Événements** | Récurrents (hebdo/mensuel), table `events` avec `recurrence_json`, lien optionnel vers un tournoi (`linked_tournament_id`) |
+| **Tournois** | Statuts draft/open/ongoing/completed/cancelled, table `tournaments`, système de templates (LoL, Valorant, CS2, Rocket League, Smash, Football, FIFA, Custom), config JSON riche (format, team_size, best_of, checkin, seeding, prizes, game, platform, region) |
 | **Boutique** | Items badge/cosmétique/physique, commandes, gestion stock, table `shop_items` + `shop_orders` |
 | **Candidatures** | Formulaires de candidature, table `applications` |
 

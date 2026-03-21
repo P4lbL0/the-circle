@@ -273,9 +273,6 @@ export default async function CommunityVitrinePage({ params }: Props) {
           {visibleModules.includes('tournaments') && (
             <a href={`/c/${slug}/tournaments`} className="vit-header-link">🥊 Tournois</a>
           )}
-          {visibleModules.includes('bets') && (
-            <a href={`/c/${slug}/bets`} className="vit-header-link">🎲 Paris</a>
-          )}
           {visibleModules.includes('forum') && (
             <a href={`/c/${slug}/chat`} className="vit-header-link">💬 Chat</a>
           )}
@@ -402,9 +399,6 @@ export default async function CommunityVitrinePage({ params }: Props) {
             {activeModules.includes('tournaments') && (
               <div className="vit-stat-pill">⚔️ Tournois</div>
             )}
-            {activeModules.includes('bets') && (
-              <div className="vit-stat-pill">🎲 Paris</div>
-            )}
             {activeModules.includes('forum') && (
               <div className="vit-stat-pill">💬 Chat</div>
             )}
@@ -440,9 +434,6 @@ export default async function CommunityVitrinePage({ params }: Props) {
             )}
             {visibleModules.includes('tournaments') && (
               <a href={`/c/${slug}/tournaments`} className="vit-nav-link">🥊 Tournois</a>
-            )}
-            {visibleModules.includes('bets') && (
-              <a href={`/c/${slug}/bets`} className="vit-nav-link">🎲 Paris</a>
             )}
             {visibleModules.includes('forum') && (
               <a href={`/c/${slug}/chat`} className="vit-nav-link">💬 Chat</a>
