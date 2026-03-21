@@ -280,6 +280,7 @@ export default function OnboardingPage() {
         community_id: community.id,
         profile_id:   user.id,
         role:         'owner',
+        is_public:    true,
       })
 
       // 4. Activer les modules

@@ -73,6 +73,7 @@ export default async function JoinPage({ params, searchParams }: Props) {
         community_id: community.id,
         profile_id:   user.id,
         role:         'member',
+        is_public:    true,
       })
 
     // Email de bienvenue (best-effort)
