@@ -37,7 +37,6 @@ interface FormData {
   modules: {
     scores: boolean
     tournaments: boolean
-    bets: boolean
     shop: boolean
     forum: boolean
     calendar: boolean
@@ -92,7 +91,6 @@ const COMMUNITY_TYPES = [
 const MODULES = [
   { key: 'scores',       label: '🏆 Scores & Classement', desc: 'Statistiques personnalisées et classement des membres' },
   { key: 'tournaments',  label: '🥊 Tournois',             desc: 'Brackets et compétitions internes' },
-  { key: 'bets',         label: '🎲 Paris internes',       desc: 'Mises en points fictifs entre membres' },
   { key: 'shop',         label: '🛍️ Boutique',             desc: 'Articles virtuels et physiques contre des points' },
   { key: 'forum',        label: '💬 Forum',                desc: 'Discussions organisées par catégories' },
   { key: 'calendar',     label: '📅 Calendrier',           desc: 'Événements et système de RSVP' },
@@ -154,7 +152,6 @@ export default function OnboardingPage() {
     modules: {
       scores: true,
       tournaments: false,
-      bets: false,
       shop: false,
       forum: true,
       calendar: true,

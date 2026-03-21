@@ -4,7 +4,7 @@ const USE_CASES = [
   {
     type: 'Clan Gaming',
     icon: '🎮',
-    desc: 'Classements KDA, tournois bracket, paris sur les matchs, boutique de skins.',
+    desc: 'Classements KDA, tournois bracket, boutique de skins.',
     stats: ['Kills / Deaths / Assists', 'Classement ELO', 'Tournois élimination directe'],
     color: '#a855f7',
   },
@@ -121,7 +121,6 @@ const PLANS = [
       '3 communautés',
       '150 membres max',
       'Tournois & Brackets',
-      'Paris internes',
       'Événements & Chat illimités',
       'Boutique virtuelle illimitée',
       'Sous-domaine slug.thecircle.app',
@@ -467,7 +466,7 @@ export default function Home() {
                 100% modulaire. 0% superflu.
               </h2>
               <p style={{ color: '#71717a', maxWidth: '500px', lineHeight: 1.7, fontSize: '0.95rem' }}>
-                Activez uniquement les modules dont votre communauté a besoin. Une classe n'a pas besoin de paris, un clan gaming pas de notes. Chaque espace est unique.
+                Activez uniquement les modules dont votre communauté a besoin. Une classe n'a pas besoin de tournois, un clan gaming pas de notes. Chaque espace est unique.
               </p>
             </div>
             <Link href="/signup" className="btn-accent">Créer mon espace maintenant</Link>

@@ -49,7 +49,8 @@ export default async function DashboardLayout({ children, params }: Props) {
         @media (max-width: 768px) {
           .tc-main {
             margin-left: 0 !important;
-            padding-top: 56px;
+            padding-top: 52px;
+            padding-bottom: 60px;
           }
         }
       `}</style>
