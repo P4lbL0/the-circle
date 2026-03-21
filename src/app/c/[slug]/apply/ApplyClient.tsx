@@ -80,6 +80,20 @@ export function ApplyClient({ community, formFields }: {
       return
     }
 
+    // Notifier l'owner par email (best-effort, ne bloque pas si ça échoue)
+    fetch('/api/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'application-submitted',
+        payload: {
+          communityId:    community.id,
+          applicantName:  name,
+          applicantEmail: email,
+        },
+      }),
+    }).catch(() => {})
+
     setSubmitted(true)
     setSubmitting(false)
   }

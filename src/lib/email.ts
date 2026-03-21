@@ -1,0 +1,121 @@
+import { Resend } from 'resend'
+
+// const FROM = 'The Circle <noreply@thecircle.app>'
+const FROM = 'The Circle <onboarding@resend.dev>'
+// Initialisation lazy — évite le crash au build si RESEND_API_KEY absent
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null
+  return new Resend(process.env.RESEND_API_KEY)
+}
+
+// ── Nouvelle candidature reçue (→ owner) ─────────────────
+export async function sendApplicationReceived({
+  ownerEmail,
+  communityName,
+  applicantName,
+  applicantEmail,
+  communitySlug,
+}: {
+  ownerEmail:     string
+  communityName:  string
+  applicantName:  string
+  applicantEmail: string
+  communitySlug:  string
+}) {
+  const resend = getResend()
+  if (!resend) return
+  return resend.emails.send({
+    from:    FROM,
+    to:      ownerEmail,
+    subject: `Nouvelle candidature pour ${communityName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111">
+        <h2 style="color:#FFC107">📋 Nouvelle candidature</h2>
+        <p><strong>${applicantName}</strong> (${applicantEmail}) vient de postuler pour rejoindre <strong>${communityName}</strong>.</p>
+        <a href="https://thecircle.app/dashboard/${communitySlug}/applications"
+           style="display:inline-block;background:#FFC107;color:#000;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;margin-top:16px">
+          Voir la candidature →
+        </a>
+        <p style="color:#999;font-size:0.82rem;margin-top:32px">The Circle · ta communauté, tes règles.</p>
+      </div>
+    `,
+  })
+}
+
+// ── Décision candidature (→ candidat) ────────────────────
+export async function sendApplicationDecision({
+  applicantEmail,
+  applicantName,
+  communityName,
+  communitySlug,
+  accepted,
+  notes,
+}: {
+  applicantEmail: string
+  applicantName:  string
+  communityName:  string
+  communitySlug:  string
+  accepted:       boolean
+  notes?:         string | null
+}) {
+  const subject = accepted
+    ? `✅ Ta candidature chez ${communityName} a été acceptée !`
+    : `Ta candidature chez ${communityName}`
+
+  const body = accepted
+    ? `<p>Bonne nouvelle ! Ta candidature pour rejoindre <strong>${communityName}</strong> a été <strong style="color:#4CAF50">acceptée</strong>.</p>
+       <a href="https://thecircle.app/c/${communitySlug}"
+          style="display:inline-block;background:#FFC107;color:#000;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;margin-top:16px">
+         Accéder à la communauté →
+       </a>`
+    : `<p>Ta candidature pour rejoindre <strong>${communityName}</strong> n'a pas été retenue cette fois.</p>
+       ${notes ? `<p style="color:#666;font-style:italic">"${notes}"</p>` : ''}`
+
+  const resend = getResend()
+  if (!resend) return
+  return resend.emails.send({
+    from:    FROM,
+    to:      applicantEmail,
+    subject,
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111">
+        <h2 style="color:#FFC107">The Circle</h2>
+        <p>Bonjour <strong>${applicantName}</strong>,</p>
+        ${body}
+        <p style="color:#999;font-size:0.82rem;margin-top:32px">The Circle · ta communauté, tes règles.</p>
+      </div>
+    `,
+  })
+}
+
+// ── Bienvenue nouveau membre (→ membre) ──────────────────
+export async function sendWelcomeEmail({
+  memberEmail,
+  memberName,
+  communityName,
+  communitySlug,
+}: {
+  memberEmail:   string
+  memberName:    string
+  communityName: string
+  communitySlug: string
+}) {
+  const resend = getResend()
+  if (!resend) return
+  return resend.emails.send({
+    from:    FROM,
+    to:      memberEmail,
+    subject: `Bienvenue dans ${communityName} 🎉`,
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111">
+        <h2 style="color:#FFC107">Bienvenue, ${memberName} !</h2>
+        <p>Tu viens de rejoindre <strong>${communityName}</strong> sur The Circle.</p>
+        <a href="https://thecircle.app/c/${communitySlug}"
+           style="display:inline-block;background:#FFC107;color:#000;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;margin-top:16px">
+          Voir la communauté →
+        </a>
+        <p style="color:#999;font-size:0.82rem;margin-top:32px">The Circle · ta communauté, tes règles.</p>
+      </div>
+    `,
+  })
+}

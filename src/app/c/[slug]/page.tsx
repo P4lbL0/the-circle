@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { MemberCard } from './MemberCard'
+import { safeEval } from '@/lib/safe-eval'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -84,11 +85,7 @@ export default async function CommunityVitrinePage({ params }: Props) {
     if (formulaConfig?.expression && statFields.length > 0) {
       try {
         const stats = member.custom_stats as Record<string, number> ?? {}
-        const keys  = Object.keys(stats)
-        const vals  = Object.values(stats)
-        // eslint-disable-next-line no-new-func
-        const fn    = new Function(...keys, `return ${formulaConfig.expression}`)
-        score = Math.round(fn(...vals) * 100) / 100
+        score = safeEval(formulaConfig.expression, stats)
       } catch { /* garder points si formule invalide */ }
     }
     return { ...member, computed_score: score }

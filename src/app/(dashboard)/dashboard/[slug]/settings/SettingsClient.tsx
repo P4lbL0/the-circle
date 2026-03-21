@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -25,6 +25,7 @@ export function SettingsClient({ community }: { community: any }) {
 
   const [slugAvailable, setSlugAvailable]   = useState<boolean | null>(null)
   const [checkingSlug, setCheckingSlug]     = useState(false)
+  const slugTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [saving, setSaving]                 = useState(false)
   const [saved, setSaved]                   = useState(false)
   const [error, setError]                   = useState<string | null>(null)
@@ -54,7 +55,10 @@ export function SettingsClient({ community }: { community: any }) {
       .replace(/^-|-$/g, '')
       .slice(0, 50)
     setForm(f => ({ ...f, slug }))
-    if (slug.length >= 3) checkSlug(slug)
+    if (slug.length >= 3) {
+      if (slugTimer.current) clearTimeout(slugTimer.current)
+      slugTimer.current = setTimeout(() => checkSlug(slug), 500)
+    }
   }
 
   // ── Sauvegarder ─────────────────────────────────────────

@@ -159,7 +159,7 @@ export default function Home() {
       overflowX: 'hidden',
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         ::selection { background: rgba(255,193,7,0.25); }
         .nav-link { color: #71717a; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.15s; }

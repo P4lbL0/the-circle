@@ -35,6 +35,7 @@ interface Community {
   name: string
   slug: string
   subscription_tier: string
+  invite_token?: string
 }
 
 const ROLE_COLORS: Record<string, string> = {
@@ -46,10 +47,11 @@ const ROLE_COLORS: Record<string, string> = {
 
 const BADGE_COLORS = ['#FFD700', '#C0C0C0', '#FF2344', '#00bcd4', '#9c27b0', '#4CAF50', '#E91E63']
 
-export function MembersClient({ community, initialMembers, statFields }: {
+export function MembersClient({ community, initialMembers, statFields, inviteToken }: {
   community: Community
   initialMembers: Member[]
   statFields: StatField[]
+  inviteToken: string
 }) {
   const supabase = createClient()
   const router = useRouter()
@@ -72,8 +74,7 @@ export function MembersClient({ community, initialMembers, statFields }: {
 
   // ── Générer lien d'invitation ───────────────────────────
   const generateInviteLink = () => {
-    const token = btoa(`${community.id}:${Date.now()}`)
-    const link  = `${window.location.origin}/join/${community.slug}?token=${token}`
+    const link = `${window.location.origin}/join/${community.slug}?token=${inviteToken}`
     setInviteLink(link)
     setShowInvite(true)
   }
@@ -191,6 +192,32 @@ export function MembersClient({ community, initialMembers, statFields }: {
     }
   }
 
+  // ── Export CSV ──────────────────────────────────────────
+  const exportCSV = (rows: Member[], fields: StatField[], communityName: string) => {
+    const statKeys = fields.map(f => f.key)
+    const statLabels = fields.map(f => f.label)
+
+    const header = ['Nom', 'Email', 'Rôle', 'Points', ...statLabels, 'Rejoint le'].join(',')
+    const lines = rows.map(m => {
+      const name  = m.profiles?.display_name ?? m.profiles?.email?.split('@')[0] ?? ''
+      const email = m.profiles?.email ?? ''
+      const stats = statKeys.map(k => m.custom_stats?.[k] ?? '').join(',')
+      const date  = new Date(m.joined_at).toLocaleDateString('fr-FR')
+      return [name, email, m.role, m.points, stats, date]
+        .map(v => `"${String(v).replace(/"/g, '""')}"`)
+        .join(',')
+    })
+
+    const csv  = [header, ...lines].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `${communityName}-membres.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   // ── Filtres ─────────────────────────────────────────────
   const filtered = members.filter(m => {
     const name  = m.profiles?.display_name ?? m.profiles?.email ?? ''
@@ -244,17 +271,30 @@ export function MembersClient({ community, initialMembers, statFields }: {
             {members.length}
           </span>
         </div>
-        <button
-          onClick={generateInviteLink}
-          style={{
-            background: '#FFC107', color: '#000', border: 'none',
-            padding: '9px 22px', fontFamily: 'Orbitron', fontWeight: 'bold',
-            fontSize: '0.78rem', cursor: 'pointer', borderRadius: '4px',
-            textTransform: 'uppercase', letterSpacing: '1px',
-          }}
-        >
-          + Inviter
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => exportCSV(members, statFields, community.name)}
+            style={{
+              background: 'transparent', color: '#666', border: '1px solid #333',
+              padding: '9px 16px', fontFamily: 'Orbitron', fontWeight: 'bold',
+              fontSize: '0.72rem', cursor: 'pointer', borderRadius: '4px',
+              textTransform: 'uppercase', letterSpacing: '1px',
+            }}
+          >
+            ↓ CSV
+          </button>
+          <button
+            onClick={generateInviteLink}
+            style={{
+              background: '#FFC107', color: '#000', border: 'none',
+              padding: '9px 22px', fontFamily: 'Orbitron', fontWeight: 'bold',
+              fontSize: '0.78rem', cursor: 'pointer', borderRadius: '4px',
+              textTransform: 'uppercase', letterSpacing: '1px',
+            }}
+          >
+            + Inviter
+          </button>
+        </div>
       </div>
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '30px' }}>

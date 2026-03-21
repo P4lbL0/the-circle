@@ -5,48 +5,37 @@ import { useState } from 'react'
 interface InviteWidgetProps {
   slug: string
   communityName: string
+  inviteToken: string
 }
 
-export function InviteWidget({ slug, communityName }: InviteWidgetProps) {
+export function InviteWidget({ slug, communityName, inviteToken }: InviteWidgetProps) {
   const [copied, setCopied] = useState(false)
   const [showModal, setShowModal] = useState(false)
 
-  const inviteUrl =
+  const getUrl = () =>
     typeof window !== 'undefined'
-      ? `${window.location.origin}/join/${slug}?token=${slug}`
-      : `/join/${slug}?token=${slug}`
+      ? `${window.location.origin}/join/${slug}?token=${inviteToken}`
+      : `/join/${slug}?token=${inviteToken}`
 
   const message = `Rejoins ${communityName} sur The Circle ! 🔥`
 
   const copy = async () => {
-    const url =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/join/${slug}?token=${slug}`
-        : `/join/${slug}?token=${slug}`
-    await navigator.clipboard.writeText(url)
+    await navigator.clipboard.writeText(getUrl())
     setCopied(true)
     setTimeout(() => setCopied(false), 2500)
   }
 
   const shareNative = () => {
-    const url =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/join/${slug}?token=${slug}`
-        : `/join/${slug}?token=${slug}`
     if (typeof navigator !== 'undefined' && navigator.share) {
-      navigator.share({ title: message, url })
+      navigator.share({ title: message, url: getUrl() })
     } else {
       copy()
     }
   }
 
-  const getUrl = () =>
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/join/${slug}?token=${slug}`
-      : `/join/${slug}?token=${slug}`
-
-  const whatsappHref = `https://wa.me/?text=${encodeURIComponent(message + ' ' + getUrl())}`
-  const telegramHref = `https://t.me/share/url?url=${encodeURIComponent(getUrl())}&text=${encodeURIComponent(message)}`
+  const url = getUrl()
+  const whatsappHref = `https://wa.me/?text=${encodeURIComponent(message + ' ' + url)}`
+  const telegramHref = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(message)}`
 
   return (
     <>
@@ -98,7 +87,7 @@ export function InviteWidget({ slug, communityName }: InviteWidgetProps) {
             {/* Link display */}
             <div style={{ background: '#0f0f0f', border: '1px solid #2a2a2a', borderRadius: '10px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
               <span style={{ flex: 1, fontSize: '0.8rem', color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
-                {`/join/${slug}?token=${slug}`}
+                {`/join/${slug}?token=${inviteToken.slice(0, 8)}…`}
               </span>
               <button
                 onClick={copy}

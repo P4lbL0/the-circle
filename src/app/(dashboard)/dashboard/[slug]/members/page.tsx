@@ -15,7 +15,7 @@ export default async function MembersPage({ params }: Props) {
 
   const { data: community } = await supabase
     .from('communities')
-    .select('id, name, slug, subscription_tier')
+    .select('id, name, slug, subscription_tier, invite_token')
     .eq('slug', slug)
     .eq('owner_id', user.id)
     .single()
@@ -39,6 +39,7 @@ export default async function MembersPage({ params }: Props) {
       community={community}
       initialMembers={members ?? []}
       statFields={(statSchema?.fields as any[]) ?? []}
+      inviteToken={community.invite_token ?? community.slug}
     />
   )
 }

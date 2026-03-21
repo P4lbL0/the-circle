@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { safeEval, validateExpression } from '@/lib/safe-eval'
 
 // ── Types ─────────────────────────────────────────────────
 interface StatField {
@@ -150,16 +151,10 @@ export function StatsSchemaClient({ community, initialSchema }: {
     try {
       const testValues: Record<string, number> = {}
       fields.filter(f => f.type === 'number' || f.type === 'percentage')
-            .forEach((f, i) => { testValues[f.key] = (i + 1) * 5 }) // ← valeurs fixes au lieu de Math.random()
+            .forEach((f, i) => { testValues[f.key] = (i + 1) * 5 })
 
-      const expr  = formula.expression
-      const keys  = Object.keys(testValues)
-      const vals  = Object.values(testValues)
-      // eslint-disable-next-line no-new-func
-      const fn     = new Function(...keys, `return ${expr}`)
-      const result = fn(...vals)
-
-      return { values: testValues, result: Math.round(result * 100) / 100 }
+      const result = safeEval(formula.expression, testValues)
+      return { values: testValues, result }
     } catch {
       return null
     }
@@ -170,10 +165,19 @@ export function StatsSchemaClient({ community, initialSchema }: {
     setSaving(true)
     setError(null)
 
-    // Validation
+    // Validation — noms dupliqués
     const keys = fields.map(f => f.key)
     if (new Set(keys).size !== keys.length) {
       setError('Deux champs ont le même nom — renomme-les.')
+      setSaving(false)
+      return
+    }
+
+    // Validation — formule syntaxiquement correcte (BUG-6)
+    const numericKeys = fields.filter(f => f.type !== 'text').map(f => f.key)
+    const formulaError = validateExpression(formula.expression, numericKeys)
+    if (formulaError) {
+      setError(`Formule invalide : ${formulaError}`)
       setSaving(false)
       return
     }

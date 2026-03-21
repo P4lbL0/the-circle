@@ -1,7 +1,7 @@
 # The Circle — Contexte Projet
 
 > Fichier de contexte à passer en début de chaque nouvelle conversation.
-> Dernière mise à jour : 14 Mars 2026
+> Dernière mise à jour : 21 Mars 2026 (session 2)
 
 ---
 
@@ -114,7 +114,7 @@ CREATE INDEX IF NOT EXISTS idx_events_recurrence_parent ON events(recurrence_par
 
 ---
 
-## Ce qui est FAIT ✅ (état au 13/03/2026)
+## Ce qui est FAIT ✅ (état au 21/03/2026)
 
 ### Infrastructure
 - [x] Next.js 16 + Supabase + Turbopack configurés
@@ -122,6 +122,7 @@ CREATE INDEX IF NOT EXISTS idx_events_recurrence_parent ON events(recurrence_par
 - [x] Middleware protection routes `/dashboard` et `/superadmin`
 - [x] RLS Supabase en place
 - [x] Build propre — 0 erreur TypeScript — 29 routes
+- [x] Types Supabase générés (`src/types/database.types.ts` — 1251 lignes)
 
 ### Onboarding (5 étapes)
 - [x] Étape 1 : nom, slug (dispo temps réel), type de communauté (gaming/sport/school/other)
@@ -138,6 +139,9 @@ CREATE INDEX IF NOT EXISTS idx_events_recurrence_parent ON events(recurrence_par
 - [x] Apparence (color picker, logo/bannière upload, police, dark/light, preview live)
 - [x] Paramètres (nom, slug, type, confidentialité, suppression)
 - [x] Stat schema (champs dynamiques + formule)
+- [x] Saisie stats membres inline (champs dynamiques par membre, sauvegarde optimiste)
+- [x] Export CSV membres + stats (bouton "↓ CSV" dans la page membres)
+- [x] Enforcement modules par URL : `/c/[slug]/events` et `/c/[slug]/leaderboard` retournent 404 si module désactivé
 
 ### Module Événements
 - [x] Dashboard : CRUD complet, groupement par mois
@@ -168,6 +172,8 @@ CREATE INDEX IF NOT EXISTS idx_events_recurrence_parent ON events(recurrence_par
 ### Module Candidatures
 - [x] Dashboard : liste candidatures avec statut, accepter (crée membre auto) / refuser
 - [x] Vitrine `/c/[slug]/apply` : formulaire de candidature
+- [x] Emails transactionnels via Resend : candidature reçue (→ owner), décision (→ candidat), bienvenue (→ nouveau membre)
+- [x] Token d'invitation UUID (plus prédictible, validé en DB via colonne `invite_token`)
 
 ### Pages publiques
 - [x] Vitrine `/c/[slug]` : hero avec bannière, membres + stats calculées, nav modules actifs
@@ -200,13 +206,13 @@ CREATE INDEX IF NOT EXISTS idx_events_recurrence_parent ON events(recurrence_par
 - [ ] **Enforcement des limites plan** côté code (10 membres Free, 50 Starter, tournois Starter+)
 
 ### Priorité 🟠 Important
-- [ ] Emails transactionnels (invitation, RSVP, candidature, paiement) via Resend ou Brevo
+- [x] ~~Emails transactionnels~~ ✅ Resend intégré (candidature, décision, bienvenue)
 - [ ] Analytics charts dashboard owner (Chart.js — évolution stats membres, activité)
 - [ ] Community discovery `/explore` — parcourir les communautés publiques
 - [ ] Invitations par email direct (pas juste un lien)
 
 ### Priorité 🟡 Valeur ajoutée
-- [ ] Export CSV membres + stats
+- [x] ~~Export CSV membres + stats~~ ✅ Implémenté
 - [ ] Sous-domaines `[slug].thecircle.app` (Starter+) via Vercel wildcard
 - [ ] Système de streaks auto (🔥 actif, 💤 inactif, 🚀 progression)
 - [ ] Système saisons (diviser stats en saisons, garder historique)
@@ -258,11 +264,17 @@ UPDATE profiles SET global_role = 'superadmin' WHERE email = 'ton@email.com';
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY           ← serveur uniquement
+RESEND_API_KEY                      ← emails transactionnels (resend.com)
 STRIPE_SECRET_KEY                   ← serveur uniquement (pas encore utilisé)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 STRIPE_WEBHOOK_SECRET
 NEXT_PUBLIC_APP_URL
 ```
+
+### Notes emails (Resend)
+- `FROM` dans `src/lib/email.ts` : `onboarding@resend.dev` en dev (sans domaine vérifié), changer en `noreply@thecircle.app` une fois le domaine acheté et vérifié dans Resend
+- Vérifier le domaine dans Resend → Domains en ajoutant des records DNS chez le registrar (gratuit)
+- Plan gratuit Resend : 3000 emails/mois
 
 ---
 
@@ -279,6 +291,121 @@ NEXT_PUBLIC_APP_URL
 | Boutique physique | ❌ | ❌ | ✅ |
 | Export CSV | ❌ | ❌ | ✅ |
 | Branding supprimé | ❌ | ❌ | ✅ |
+
+---
+
+---
+
+## Sécurité — Audit 21/03/2026
+
+### 🔴 CRITIQUE
+
+**[SEC-1] ✅ CORRIGÉ — `new Function()` remplacé par `safeEval`**
+- Fichier créé : `src/lib/safe-eval.ts` — whitelist chars, blacklist identifiants dangereux, validation formule à la sauvegarde
+
+**[SEC-2] ✅ CORRIGÉ — Token d'invitation UUID**
+- Migration `supabase/migrations/20260321_add_invite_token.sql` appliquée
+- Colonne `invite_token uuid DEFAULT gen_random_uuid()` sur `communities`
+
+**[SEC-3] ✅ CORRIGÉ — Superadmin vérifié dans le middleware**
+- `src/proxy.ts` vérifie `global_role = 'superadmin'` en DB avant d'autoriser l'accès
+
+### 🟠 ÉLEVÉ
+
+**[SEC-4] ✅ CORRIGÉ — Types DB générés**
+- Types Supabase générés le 21/03/2026 via `npm run gen:types` (1251 lignes)
+
+**[SEC-5] ⚠️ PARTIEL — Accès modules non vérifié côté navigation**
+- `/c/[slug]/events` et `/c/[slug]/leaderboard` ✅ vérifiés (retournent 404 si désactivé)
+- Côté dashboard : pas encore de vérification (owner peut toujours accéder même si désactivé — risque faible)
+
+**[SEC-6] CSS injection via `theme_json`**
+- Les valeurs de couleurs du thème sont injectées directement dans les styles inline sans validation
+- Ex : `color: ${theme.primary}` — si primary = `red; background: url(evil)`, risque d'injection CSS
+- **Fix :** Valider que les valeurs de couleur correspondent à un format hex/rgb
+
+### 🟡 MOYEN
+
+**[SEC-7] `console.log('[DEBUG leaderboard]', ...)` en production**
+- Fichier : `c/[slug]/leaderboard/page.tsx` ligne ~19
+- Expose les erreurs Supabase en console
+- **Fix :** Supprimer ou remplacer par `console.error` conditionnel à `NODE_ENV`
+
+**[SEC-8] Pas d'enforcement email verification**
+- Le user peut se connecter avant d'avoir confirmé son email
+- **Fix :** Ajouter `email_confirm: true` dans la config Supabase ou vérifier `email_confirmed_at`
+
+---
+
+## Bugs identifiés — Audit 21/03/2026
+
+### 🟢 Faciles (quick fix)
+
+**[BUG-1] ✅ CORRIGÉ — Debounce slug check (500ms) dans onboarding et settings**
+
+**[BUG-2] ✅ CORRIGÉ — `console.log` debug leaderboard supprimé**
+
+**[BUG-3] ✅ CORRIGÉ — Police Inter double-chargée supprimée de la landing**
+
+### 🟠 Moyens (logique applicative)
+
+**[BUG-4] Suppression communauté n'orpheline pas les données**
+- Fichier : `dashboard/[slug]/settings/SettingsClient.tsx`
+- DELETE sur `communities` laisse les `community_members`, `events`, `bets` etc. en DB
+- **Fix :** Cascade DELETE en base ou nettoyage applicatif séquentiel
+
+**[BUG-5] Pas de pagination sur le leaderboard**
+- Fichier : `c/[slug]/leaderboard/page.tsx`
+- Tous les membres chargés d'un coup
+- **Fix :** `.range(0, 49)` + bouton "charger plus"
+
+**[BUG-6] ✅ CORRIGÉ — Formule validée via `validateExpression()` à la sauvegarde**
+
+**[BUG-7] Compteur membres non temps-réel dans le dashboard**
+- La vue d'ensemble (`dashboard/[slug]/page.tsx`) affiche un count statique SSR
+- Si un membre rejoint via `/join`, le dashboard n'est pas rafraîchi
+- **Fix :** Subscription Supabase realtime ou revalidation de tag Next.js
+
+### 🔴 Difficiles (architecture)
+
+**[BUG-8] ⚠️ PARTIEL — Enforcement modules**
+- `/c/[slug]/events` et `/c/[slug]/leaderboard` ✅ corrigés
+- Autres modules vitrine (tournaments, bets, shop, forum) : non encore vérifiés par URL directe
+
+**[BUG-9] Race condition lors de la création de communauté (onboarding)**
+- L'onboarding fait plusieurs INSERT séquentiels (community → member → features → stat_schema) sans transaction
+- Si l'un échoue à mi-chemin, la communauté est créée en état partiel
+- **Fix :** Utiliser une Supabase Edge Function ou une RPC PG transactionnelle
+
+---
+
+## Améliorations potentielles
+
+### Priorité produit
+1. ~~**Saisie des stats membres**~~ ✅ Implémenté
+2. ~~**Notifications email**~~ ✅ Resend intégré (candidature, décision, bienvenue)
+3. **Stripe billing** — Paiement non intégré, plans non enforced côté code
+4. **Analytics dashboard** — Charts Chart.js sur l'évolution des stats (inspiration OG)
+
+### UX & Engagement
+5. **Community discovery `/explore`** — Parcourir les communautés publiques
+6. **Activity feed** — Timeline des actions récentes dans la communauté
+7. **Système de streaks** — 🔥 actif / 💤 inactif / 🚀 progression (logique dans OG)
+8. **Système saisons** — Diviser les stats en saisons avec historique
+9. **Comparaison 1v1** — Panel Versus côte-à-côte (feature forte de l'OG)
+10. **Système achievements/trophées** — Badges auto débloqués par milestones
+11. **Polls rapides** — Sondages oui/non ou multi-choix
+12. **Webhooks Discord/Slack** — Notifs auto quand événement créé, pari ouvert, etc.
+
+### Tech & Infrastructure
+13. **`next/image`** — Aucune image n'utilise le composant optimisé (toutes en `<img>`)
+14. ~~**Types Supabase**~~ ✅ Générés (`npm run gen:types` — project ID configuré)
+15. **Real-time global** — Seul le chat a des subscriptions realtime ; étendre aux stats, événements
+16. ~~**Export CSV**~~ ✅ Implémenté (bouton "↓ CSV" dans la page membres)
+17. **Domaine custom** — Mentionné en Pro, non implémenté (Vercel Domains API)
+18. **Sous-domaines** — `[slug].thecircle.app` pour Starter+ via Vercel wildcard
+19. **Tests E2E** — Playwright sur les flows critiques (création communauté, invitation, achat boutique)
+20. **Import CSV membres** — Upload en masse pour les grandes communautés
 
 ---
 

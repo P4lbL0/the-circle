@@ -32,10 +32,18 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Protéger le super admin
+  // Protéger le super admin — vérifier la session ET le rôle
   if (request.nextUrl.pathname.startsWith('/superadmin')) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
+    }
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('global_role')
+      .eq('id', user.id)
+      .single()
+    if (profile?.global_role !== 'superadmin') {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
 

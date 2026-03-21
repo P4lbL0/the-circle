@@ -19,6 +19,15 @@ export default async function PublicEventsPage({ params }: Props) {
 
   if (!community) notFound()
 
+  const { data: calendarFeature } = await supabase
+    .from('features')
+    .select('id')
+    .eq('community_id', community.id)
+    .eq('module', 'calendar')
+    .eq('enabled', true)
+    .single()
+  if (!calendarFeature) notFound()
+
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: events } = await supabase

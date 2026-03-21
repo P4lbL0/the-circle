@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { JoinClient } from './JoinClient'
 import { getMemberLimit } from '@/lib/plan-limits'
+import { sendWelcomeEmail } from '@/lib/email'
 
 interface Props {
   params:      Promise<{ slug: string }>
@@ -17,11 +18,16 @@ export default async function JoinPage({ params, searchParams }: Props) {
 
   const { data: community } = await supabase
     .from('communities')
-    .select('id, name, slug, logo_url, description, theme_json, subscription_tier')
+    .select('id, name, slug, logo_url, description, theme_json, subscription_tier, invite_token')
     .eq('slug', slug)
     .single()
 
   if (!community) notFound()
+
+  // Valider le token — doit correspondre à l'invite_token de la communauté
+  // Fallback sur slug pour les communautés créées avant la migration
+  const validToken = community.invite_token ?? community.slug
+  if (token !== validToken) notFound()
 
   // Vérifier si l'user est déjà connecté
   const { data: { user } } = await supabase.auth.getUser()
@@ -68,6 +74,22 @@ export default async function JoinPage({ params, searchParams }: Props) {
         profile_id:   user.id,
         role:         'member',
       })
+
+    // Email de bienvenue (best-effort)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name, email')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.email) {
+      sendWelcomeEmail({
+        memberEmail:   profile.email,
+        memberName:    profile.display_name ?? profile.email.split('@')[0],
+        communityName: community.name,
+        communitySlug: community.slug,
+      }).catch(() => {})
+    }
 
     redirect(`/c/${slug}`)
   }

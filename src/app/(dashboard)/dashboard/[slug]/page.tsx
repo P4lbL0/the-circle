@@ -132,7 +132,7 @@ export default async function CommunityDashboardPage({ params }: Props) {
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-bold text-gray-900">Membres</h2>
-            <InviteWidget slug={community.slug} communityName={community.name} />
+            <InviteWidget slug={community.slug} communityName={community.name} inviteToken={community.invite_token ?? community.slug} />
           </div>
 
           {members && members.length > 0 ? (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -140,6 +140,7 @@ export default function OnboardingPage() {
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
   const [checkingSlug, setCheckingSlug]   = useState(false)
   const [createdSlug, setCreatedSlug]     = useState<string>('')
+  const slugTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [form, setForm] = useState<FormData>({
     name: '',
@@ -162,16 +163,21 @@ export default function OnboardingPage() {
   })
 
   // ── Handlers ─────────────────────────────────────────────
-  const handleNameChange = async (value: string) => {
-    const slug = generateSlug(value)
-    setForm(f => ({ ...f, name: value, slug }))
-    if (slug.length >= 3) await checkSlug(slug)
+  const scheduleSlugCheck = (slug: string) => {
+    if (slugTimer.current) clearTimeout(slugTimer.current)
+    slugTimer.current = setTimeout(() => checkSlug(slug), 500)
   }
 
-  const handleSlugChange = async (value: string) => {
+  const handleNameChange = (value: string) => {
+    const slug = generateSlug(value)
+    setForm(f => ({ ...f, name: value, slug }))
+    if (slug.length >= 3) scheduleSlugCheck(slug)
+  }
+
+  const handleSlugChange = (value: string) => {
     const slug = generateSlug(value)
     setForm(f => ({ ...f, slug }))
-    if (slug.length >= 3) await checkSlug(slug)
+    if (slug.length >= 3) scheduleSlugCheck(slug)
   }
 
   const handleTypeChange = (type: CommunityType) => {

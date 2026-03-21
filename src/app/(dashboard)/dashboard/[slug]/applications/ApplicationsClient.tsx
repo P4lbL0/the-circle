@@ -115,6 +115,28 @@ export function ApplicationsClient({ community, initialApplications, formFields,
         }
       }
 
+      // Notifier le candidat par email si accepté ou refusé
+      if (status === 'accepted' || status === 'rejected') {
+        const app = applications.find(a => a.id === id)
+        if (app?.applicant_email) {
+          fetch('/api/email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'application-decision',
+              payload: {
+                applicantEmail: app.applicant_email,
+                applicantName:  app.applicant_name ?? app.applicant_email,
+                communityName:  community.name,
+                communitySlug:  community.slug,
+                accepted:       status === 'accepted',
+                notes:          notes || null,
+              },
+            }),
+          }).catch(() => {})
+        }
+      }
+
       showToast(
         status === 'accepted'   ? '✓ Candidature acceptée'    :
         status === 'rejected'   ? '✗ Candidature refusée'     :
