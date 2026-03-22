@@ -134,6 +134,16 @@ export default function AppearancePage() {
   // ── Sauvegarde ──────────────────────────────────────────
   const handleSave = async () => {
     if (!community) return
+
+    const isValidColor = (v: string) =>
+      /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(v) ||
+      /^rgb\(\d{1,3},\s*\d{1,3},\s*\d{1,3}\)$/.test(v)
+
+    if (!isValidColor(theme.primaryColor) || !isValidColor(theme.accentColor)) {
+      setError('Couleur invalide. Utilisez le format #RRGGBB.')
+      return
+    }
+
     setSaving(true); setError(null)
     try {
       const { data: { user } } = await supabase.auth.getUser()

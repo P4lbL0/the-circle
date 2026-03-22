@@ -28,8 +28,13 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Protéger les routes dashboard
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  if (request.nextUrl.pathname.startsWith('/dashboard')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    if (!user.email_confirmed_at) {
+      return NextResponse.redirect(new URL('/login?error=email_not_confirmed', request.url))
+    }
   }
 
   // Protéger le super admin — vérifier la session ET le rôle

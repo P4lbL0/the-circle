@@ -256,46 +256,22 @@ export default function OnboardingPage() {
         logoUrl = urlData.publicUrl
       }
 
-      // 2. Créer la communauté
-      const { data: community, error: communityError } = await supabase
-        .from('communities')
-        .insert({
-          owner_id:       user.id,
-          name:           form.name,
-          slug:           form.slug,
-          community_type: form.community_type,
-          description:    form.description || null,
-          logo_url:       logoUrl,
-        })
-        .select('id, slug')
-        .single()
-
-      if (communityError) throw communityError
-
-      // 3. Ajouter l'owner comme membre
-      await supabase.from('community_members').insert({
-        community_id: community.id,
-        profile_id:   user.id,
-        role:         'owner',
-        is_public:    true,
+      // 2-5. Créer la communauté en une seule transaction atomique (RPC)
+      const { data: result, error: rpcError } = await supabase.rpc('create_community_transactional', {
+        p_owner_id:       user.id,
+        p_name:           form.name,
+        p_slug:           form.slug,
+        p_community_type: form.community_type,
+        p_description:    form.description || null,
+        p_logo_url:       logoUrl,
+        p_modules:        form.modules,
+        p_stat_fields:    form.statFields,
+        p_formula_config: form.statFormula,
       })
 
-      // 4. Activer les modules
-      await Promise.all(
-        Object.entries(form.modules).map(([module, enabled]) =>
-          supabase.from('features').update({ enabled }).eq('community_id', community.id).eq('module', module)
-        )
-      )
+      if (rpcError) throw rpcError
 
-      // 4. Mettre à jour le schéma de stats
-      await supabase
-        .from('stat_schemas')
-        .update({ fields: form.statFields, formula_config: form.statFormula })
-        .eq('community_id', community.id)
-
-      // 5. Marquer l'onboarding terminé
-      await supabase.from('communities').update({ onboarding_completed: true }).eq('id', community.id)
-
+      const community = result as { id: string; slug: string }
       setCreatedSlug(community.slug)
       setStep(5)
 
