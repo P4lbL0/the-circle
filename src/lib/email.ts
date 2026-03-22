@@ -1,7 +1,6 @@
 import { Resend } from 'resend'
 
-// const FROM = 'The Circle <noreply@thecircle.app>'
-const FROM = 'The Circle <onboarding@resend.dev>'
+const FROM = 'The Circle <noreply@the-circle.pro>'
 // Initialisation lazy — évite le crash au build si RESEND_API_KEY absent
 function getResend() {
   if (!process.env.RESEND_API_KEY) return null
