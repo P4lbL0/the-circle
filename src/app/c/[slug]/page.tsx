@@ -264,7 +264,7 @@ export default async function CommunityVitrinePage({ params }: Props) {
           </div>
         </div>
 
-        {/* Right: nav links + login/user */}
+        {/* Nav liens (cachée sur mobile) */}
         <div className="vit-header-nav" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           {visibleModules.includes('scores') && (
             <Link href={`/c/${slug}/leaderboard`} className="vit-header-link">🏆 Classement</Link>
@@ -281,6 +281,10 @@ export default async function CommunityVitrinePage({ params }: Props) {
           {visibleModules.includes('shop') && (
             <Link href={`/c/${slug}/shop`} className="vit-header-link">🛍️ Boutique</Link>
           )}
+        </div>
+
+        {/* Cloche + user — toujours visible */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {user && (
             <VitrineBell
               communityId={community.id}
@@ -292,17 +296,16 @@ export default async function CommunityVitrinePage({ params }: Props) {
           )}
           {user ? (
             <span style={{
-              marginLeft: '8px',
               fontFamily: `'Orbitron', sans-serif`, fontSize: '0.72rem',
               color: primaryColor, border: `1px solid ${primaryColor}`,
               padding: '8px 16px', borderRadius: '4px',
               textTransform: 'uppercase', letterSpacing: '1px',
+              maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
               {currentDisplayName}
             </span>
           ) : (
             <Link href={`/login?redirect=/c/${slug}`} style={{
-              marginLeft: '12px',
               fontFamily: `'Orbitron', sans-serif`, fontSize: '0.72rem',
               color: primaryColor, border: `1px solid ${primaryColor}`,
               padding: '8px 16px', borderRadius: '4px', textDecoration: 'none',

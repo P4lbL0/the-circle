@@ -79,6 +79,8 @@ export function DashboardHomeClient({ community, userId, canManage, stats, initi
     if (!error) {
       setAnnouncements(prev => prev.filter(a => a.id !== id))
       showToast('Annonce supprimée')
+    } else {
+      showToast(error.message ?? 'Erreur lors de la suppression', false)
     }
   }
 

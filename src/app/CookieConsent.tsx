@@ -53,8 +53,10 @@ export function CookieConsent() {
             }
             .tc-cookie-banner {
               position: fixed;
-              bottom: 24px; left: 50%; transform: translateX(-50%);
+              bottom: 24px;
+              left: 0; right: 0;
               width: calc(100% - 48px); max-width: 540px;
+              margin: 0 auto;
               background: #141414;
               border: 1px solid #2a2a2a;
               border-radius: 14px;

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Badge, BadgeStyles } from '@/components/BadgeRenderer'
 import type { BadgeDef } from '@/lib/badgeConfig'
+import { createClient } from '@/lib/supabase/client'
 
 interface StatField { key: string; label: string; type: string }
 
@@ -47,7 +48,30 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 export function DossierClient({ member, profile, community, statFields, formulaLabel, isOwn }: DossierProps) {
+  const supabase = createClient()
   const [tab, setTab] = useState<'stats' | 'infos'>('stats')
+  const [editingPseudo, setEditingPseudo] = useState(false)
+  const [pseudoValue, setPseudoValue]     = useState(profile.display_name ?? profile.email.split('@')[0])
+  const [pseudoSaving, setPseudoSaving]   = useState(false)
+  const [pseudoMsg, setPseudoMsg]         = useState<{ text: string; ok: boolean } | null>(null)
+
+  const savePseudo = async () => {
+    const trimmed = pseudoValue.trim()
+    if (!trimmed || trimmed.length < 2) return
+    setPseudoSaving(true)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ display_name: trimmed })
+      .eq('id', profile.id)
+    if (!error) {
+      setPseudoMsg({ text: 'Pseudo mis à jour ✓', ok: true })
+      setEditingPseudo(false)
+    } else {
+      setPseudoMsg({ text: error.message, ok: false })
+    }
+    setPseudoSaving(false)
+    setTimeout(() => setPseudoMsg(null), 3000)
+  }
 
   const theme      = community.theme_json as { primaryColor: string; accentColor: string; font: string; darkMode: boolean }
   const primary    = theme.primaryColor ?? '#FFD700'
@@ -306,10 +330,70 @@ export function DossierClient({ member, profile, community, statFields, formulaL
           {/* ── Tab : Identité ───────────────────────────────────────────── */}
           {tab === 'infos' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '10px', overflow: 'hidden' }}>
+
+              {/* Pseudo — éditable si isOwn */}
+              <div style={{ background: panel, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', gap: '12px' }}>
+                <span style={{ fontFamily: `'Orbitron', sans-serif`, fontSize: '0.7rem', color: muted, textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0 }}>
+                  Pseudo
+                </span>
+                {isOwn && editingPseudo ? (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>
+                    <input
+                      value={pseudoValue}
+                      onChange={e => setPseudoValue(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') savePseudo(); if (e.key === 'Escape') setEditingPseudo(false) }}
+                      autoFocus
+                      maxLength={32}
+                      style={{
+                        background: '#1a1a1a', border: `1px solid ${primary}`,
+                        borderRadius: '6px', padding: '6px 12px',
+                        color: text, fontFamily: `'Rajdhani', sans-serif`, fontSize: '1rem', fontWeight: 600,
+                        outline: 'none', width: '160px',
+                      }}
+                    />
+                    <button onClick={savePseudo} disabled={pseudoSaving} style={{
+                      background: primary, color: '#000', border: 'none',
+                      borderRadius: '6px', padding: '6px 14px',
+                      fontFamily: `'Orbitron', sans-serif`, fontSize: '0.68rem', fontWeight: 700,
+                      cursor: 'pointer', letterSpacing: '0.5px',
+                    }}>
+                      {pseudoSaving ? '…' : 'OK'}
+                    </button>
+                    <button onClick={() => setEditingPseudo(false)} style={{
+                      background: 'transparent', color: muted, border: `1px solid #2a2a2a`,
+                      borderRadius: '6px', padding: '6px 10px', cursor: 'pointer', fontSize: '0.8rem',
+                    }}>✕</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontFamily: `'Rajdhani', sans-serif`, fontSize: '1rem', color: text, fontWeight: 600 }}>
+                      {pseudoValue}
+                    </span>
+                    {isOwn && (
+                      <button onClick={() => setEditingPseudo(true)} style={{
+                        background: 'transparent', border: `1px solid #2a2a2a`,
+                        borderRadius: '5px', padding: '3px 8px',
+                        color: muted, cursor: 'pointer', fontSize: '0.72rem',
+                        fontFamily: `'Orbitron', sans-serif`, transition: 'all 0.15s',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = primary; e.currentTarget.style.color = primary }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = muted }}>
+                        Modifier
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {pseudoMsg && (
+                <div style={{ background: pseudoMsg.ok ? '#4CAF5015' : '#FF234415', borderLeft: `3px solid ${pseudoMsg.ok ? '#4CAF50' : '#FF2344'}`, padding: '10px 24px', fontSize: '0.82rem', color: pseudoMsg.ok ? '#4CAF50' : '#FF2344', fontFamily: `'Rajdhani', sans-serif` }}>
+                  {pseudoMsg.text}
+                </div>
+              )}
+
               {[
-                { label: 'Pseudo', value: displayName },
                 { label: 'Rôle', value: roleLabel },
-                { label: 'Date d\'arrivée', value: joinDate },
+                { label: "Date d'arrivée", value: joinDate },
                 { label: 'Points', value: member.points.toLocaleString('fr-FR') },
                 ...(isOwn ? [{ label: 'Email', value: profile.email }] : []),
               ].map(({ label, value }) => (
