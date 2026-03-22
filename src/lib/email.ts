@@ -8,6 +8,43 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY)
 }
 
+// ── Confirmation d'inscription (→ nouvel utilisateur) ────
+export async function sendConfirmationEmail({
+  email,
+  displayName,
+  token_hash,
+}: {
+  email:       string
+  displayName: string
+  token_hash:  string
+}) {
+  const resend = getResend()
+  if (!resend) return
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://the-circle.vercel.app'
+  const confirmUrl = `${siteUrl}/auth/confirm?token_hash=${token_hash}&type=signup`
+
+  return resend.emails.send({
+    from:    FROM,
+    to:      email,
+    subject: 'Confirme ton adresse email — The Circle',
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111">
+        <h2 style="color:#FFC107">The Circle</h2>
+        <p>Bonjour${displayName ? ` <strong>${displayName}</strong>` : ''} !</p>
+        <p>Clique sur le bouton ci-dessous pour confirmer ton adresse email et activer ton compte.</p>
+        <a href="${confirmUrl}"
+           style="display:inline-block;background:#FFC107;color:#000;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;margin-top:16px">
+          Confirmer mon email →
+        </a>
+        <p style="color:#999;font-size:0.82rem;margin-top:32px">
+          Si tu n'as pas créé de compte, ignore cet email.<br/>
+          The Circle · ta communauté, tes règles.
+        </p>
+      </div>
+    `,
+  })
+}
+
 // ── Nouvelle candidature reçue (→ owner) ─────────────────
 export async function sendApplicationReceived({
   ownerEmail,

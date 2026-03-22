@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 export default function SignupPage() {
   const [displayName, setDisplayName] = useState('')
@@ -28,22 +27,16 @@ export default function SignupPage() {
     }
 
     setLoading(true)
-    const supabase = createClient()
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { display_name: displayName },
-      },
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, displayName }),
     })
+    const json = await res.json()
 
-    if (error) {
-      if (error.message.toLowerCase().includes('already registered')) {
-        setError('Cet email est déjà utilisé.')
-      } else {
-        setError(error.message)
-      }
+    if (!res.ok) {
+      setError(json.error ?? 'Une erreur est survenue.')
       setLoading(false)
       return
     }
