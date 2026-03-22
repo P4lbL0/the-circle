@@ -44,6 +44,42 @@ export async function sendConfirmationEmail({
   })
 }
 
+// ── Magic link (→ rejoindre communauté / connexion) ──────
+export async function sendMagicLinkEmail({
+  email,
+  token_hash,
+  redirectTo,
+}: {
+  email:      string
+  token_hash: string
+  redirectTo: string
+}) {
+  const resend = getResend()
+  if (!resend) return
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://the-circle.vercel.app'
+  const magicUrl = `${siteUrl}/auth/confirm?token_hash=${token_hash}&type=magiclink&next=${encodeURIComponent(redirectTo)}`
+
+  return resend.emails.send({
+    from:    FROM,
+    to:      email,
+    subject: 'Ton lien de connexion — The Circle',
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111">
+        <h2 style="color:#FFC107">The Circle</h2>
+        <p>Clique sur le bouton ci-dessous pour rejoindre la communauté. Ce lien est valable 1 heure.</p>
+        <a href="${magicUrl}"
+           style="display:inline-block;background:#FFC107;color:#000;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;margin-top:16px">
+          Rejoindre la communauté →
+        </a>
+        <p style="color:#999;font-size:0.82rem;margin-top:32px">
+          Si tu n'as pas demandé ce lien, ignore cet email.<br/>
+          The Circle · ta communauté, tes règles.
+        </p>
+      </div>
+    `,
+  })
+}
+
 // ── Nouvelle candidature reçue (→ owner) ─────────────────
 export async function sendApplicationReceived({
   ownerEmail,

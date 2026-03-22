@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 interface Community {
   id:           string
@@ -42,17 +41,18 @@ export function JoinClient({ community, token }: {
     setError(null)
     setLoading(true)
 
-    const supabase = createClient()
     const redirectTo =
       `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/join/${community.slug}?token=${token}`)}`
 
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo },
+    const res = await fetch('/api/auth/magic-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, redirectTo }),
     })
+    const json = await res.json()
 
-    if (otpError) {
-      setError('Impossible d\'envoyer le lien. Vérifie ton email.')
+    if (!res.ok) {
+      setError(json.error ?? 'Impossible d\'envoyer le lien. Vérifie ton email.')
       setLoading(false)
       return
     }
