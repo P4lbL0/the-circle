@@ -41,13 +41,10 @@ export function JoinClient({ community, token }: {
     setError(null)
     setLoading(true)
 
-    const redirectTo =
-      `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/join/${community.slug}?token=${token}`)}`
-
     const res = await fetch('/api/auth/magic-link', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, redirectTo }),
+      body: JSON.stringify({ email, redirectTo: `/join/${community.slug}?token=${token}` }),
     })
     const json = await res.json()
 

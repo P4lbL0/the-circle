@@ -15,10 +15,13 @@ export async function POST(request: Request) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://the-circle-self.vercel.app'
+  const fullRedirectTo = redirectTo.startsWith('http') ? redirectTo : `${siteUrl}${redirectTo}`
+
   const { data, error } = await supabaseAdmin.auth.admin.generateLink({
     type: 'magiclink',
     email,
-    options: { redirectTo },
+    options: { redirectTo: fullRedirectTo },
   })
 
   if (error) {
