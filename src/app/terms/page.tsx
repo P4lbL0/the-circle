@@ -136,18 +136,43 @@ export default function TermsPage() {
         <hr />
 
         <div className="legal-section">
-          <h2>9. Suppression du compte</h2>
+          <h2>9. Responsabilité des organisateurs de communauté</h2>
           <p>
-            Vous pouvez demander la suppression de votre compte à tout moment en contactant
-            <a href="mailto:thecircle.contact@gmail.com" style={{ color: '#FFC107', marginLeft: 4 }}>thecircle.contact@gmail.com</a>.
-            Vos données seront supprimées dans un délai de 30 jours, sauf obligation légale de conservation.
+            Toute personne créant une communauté sur The Circle (ci-après « l'Organisateur ») agit en tant que
+            responsable de traitement au sens du RGPD pour les données qu'il collecte sur ses membres.
+            The Circle fournit uniquement l'outil technique et n'assume aucune responsabilité éditoriale
+            sur le contenu des communautés.
+          </p>
+          <p style={{ marginTop: 10 }}>L'Organisateur s'engage notamment à :</p>
+          <ul>
+            <li>Ne pas collecter de données sensibles dans les champs de statistiques personnalisées (données de santé, opinions politiques, convictions religieuses, origines ethniques, etc.)</li>
+            <li>Informer ses membres des données collectées et de leur finalité</li>
+            <li>Respecter les droits des membres (accès, rectification, suppression) sur demande</li>
+            <li>Ne pas partager les données de ses membres avec des tiers sans consentement</li>
+          </ul>
+          <p style={{ marginTop: 10 }}>
+            The Circle se réserve le droit de supprimer sans préavis toute communauté dont le contenu ou
+            les pratiques de collecte de données ne respectent pas les présentes CGU ou la réglementation en vigueur.
           </p>
         </div>
 
         <hr />
 
         <div className="legal-section">
-          <h2>10. Droit applicable</h2>
+          <h2>10. Suppression du compte</h2>
+          <p>
+            Vous pouvez supprimer votre compte directement depuis votre espace personnel
+            (<a href="/account" style={{ color: '#FFC107' }}>Mon compte</a>).
+            Vos données seront supprimées immédiatement, sauf obligation légale de conservation.
+            Vous pouvez également contacter{' '}
+            <a href="mailto:thecircle.contact@gmail.com" style={{ color: '#FFC107' }}>thecircle.contact@gmail.com</a>.
+          </p>
+        </div>
+
+        <hr />
+
+        <div className="legal-section">
+          <h2>11. Droit applicable</h2>
           <p>
             Les présentes CGU sont soumises au droit français. En cas de litige, et à défaut de résolution amiable,
             les tribunaux français seront compétents.

@@ -22,11 +22,11 @@
 
 | Droit | État | Action requise |
 |---|---|---|
-| **Droit d'accès** | ❌ Non implémenté | Ajouter page "Mes données" dans le profil |
+| **Droit d'accès** | ✅ Implémenté | Page `/account` + export JSON via `/api/account/export` |
 | **Droit de rectification** | ✅ Partiel | Le pseudo est modifiable. Email via Supabase Auth. |
-| **Droit à l'effacement** | ❌ Non implémenté | Ajouter bouton "Supprimer mon compte" avec suppression en cascade |
-| **Droit à la portabilité** | ❌ Non implémenté | Export JSON des données personnelles |
-| **Droit d'opposition** | ❌ Non implémenté | Opt-out des emails transactionnels |
+| **Droit à l'effacement** | ✅ Implémenté | Bouton "Supprimer mon compte" sur `/account` via `/api/account/delete` |
+| **Droit à la portabilité** | ✅ Implémenté | Export JSON des données sur `/account` |
+| **Droit d'opposition** | ✅ Partiel | Footer de désinscription dans tous les emails Resend + lien vers `/account` |
 | **Consentement cookies** | ✅ Bandeau RGPD présent | Cookie banner déjà en place sur la vitrine |
 
 ### Sous-traitants (Article 28 RGPD)
@@ -77,7 +77,7 @@
 | Accès par rôle (RLS) | ✅ Row Level Security activé |
 | Mots de passe hashés | ✅ Géré par Supabase Auth (bcrypt) |
 | Logs d'accès | ✅ Vercel + Supabase logs |
-| Authentification forte | ⚠️ Pas de 2FA proposé aux utilisateurs |
+| Authentification forte | — 2FA non prévu pour l'instant |
 
 ---
 
@@ -111,12 +111,11 @@
 
 | Priorité | Action | Effort |
 |---|---|---|
-| 🔴 Critique | Ajouter bouton "Supprimer mon compte" | 2h |
-| 🔴 Critique | Page "Mes données" avec export | 3h |
-| 🟠 Important | Footer de désinscription dans les emails Resend | 30 min |
-| 🟠 Important | Vérifier DPA Resend | 15 min |
+| ✅ Fait | Bouton "Supprimer mon compte" (`/account` + `/api/account/delete`) | — |
+| ✅ Fait | Page "Mes données" avec export JSON (`/account` + `/api/account/export`) | — |
+| ✅ Fait | Footer de désinscription dans tous les emails Resend | — |
+| 🟠 Important | Vérifier DPA Resend (resend.com/legal/dpa) | 15 min |
 | 🟡 Moyen | Purge automatique des comptes inactifs (3 ans) | 2h |
-| 🟡 Moyen | Proposer 2FA aux utilisateurs | 4h |
 
 ---
 
